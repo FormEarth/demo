@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.PermissionMapper">
+
+    <!--根据账号获取所有权限-->
+    <select id="getPermissionsByAccount" parameterType="String" resultType="Permission">
+    	select permission.* from`user`
+    		join user_role u on `user`.user_id =u.user_id
+    		join role on u.`role _id` = role.role_id
+    		join role_permission r on role.role_id = r.role_id
+    		join permission on r.permission_id = permission.permission_id
+    		and `user`.account=#{account};
+    </select>
+    
+</mapper>

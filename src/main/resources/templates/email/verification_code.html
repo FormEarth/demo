@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>注册验证码</title>
+</head>
+<style>
+	.verification-code{
+		display: inline-block;
+		letter-spacing: 5px;
+		font-size: 18px;
+		border:1px cornflowerblue dashed ;
+		margin-bottom: 5px;
+	}
+	.footer{
+		text-align: right;
+	}
+</style>
+<body>
+	<p>您好！</p>
+	<p>您正在注册本站，如果这是您本人的行为，请填写如下验证码至我们的网站；如果不是请忽略本邮件</p>
+	<div class="verification-code"><span th:text="${verificationCode}"></span></div>
+	<p>本邮件由系统自动生成，请勿直接回复</p>
+	<hr>
+	<div class="footer"><a th:href="@{http://www.baidu.com}">--ARSC</a></div>
+</body>
+</html>
