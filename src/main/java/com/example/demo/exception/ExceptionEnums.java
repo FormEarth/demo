@@ -7,8 +7,8 @@ package com.example.demo.exception;
  */
 public enum ExceptionEnums {
 
-	/** 账号不存在 */
-	ACCOUNT_NOT_EXIT("1000","账号不存在"),
+	/** 用户不存在 */
+	USER_NOT_EXIT("1000","账号不存在"),
 	/** 密码错误 */
 	PASSWORD_ERROR("1001","密码错误"),
 	/** 用户未登录 */
@@ -23,6 +23,8 @@ public enum ExceptionEnums {
 	UNAUTH_ERROR("1006","您没有权限访问该功能"),
 	/** 用户被锁定 */
 	USERSTATUS_IS_LOCK("1007","当前用户被锁定"),
+	/** 用户已注销 */
+	USERSTATUS_IS_INVALID("1008","用户已注销"),
 	/** 404 */
 	API_NOT_FOUND("404","请求地址不存在"),
 	/** 文件写入失败 */
@@ -43,6 +45,10 @@ public enum ExceptionEnums {
 	DATA_UPDATE_FAIL("1016","数据更新失败"),
 	/** 登出失败 */
 	LOGOUT_FAIL("1017","登出失败"),
+	/** 访问的资源不存在  */
+	SOURCE_NOT_FOUND("1018","访问的资源不存在"),
+	/** 无权访问当前资源  */
+	SOURCE_NOT_PERMIT("1019","当前资源不允许访问"),
 	/** 数据验证失败 */
 	FILED_VALIDATOR_ERROR("1111","数据验证失败"),
 	/** 默认的成功 */

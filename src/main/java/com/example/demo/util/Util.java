@@ -9,7 +9,15 @@ import java.util.Enumeration;
 
 import org.apache.shiro.crypto.hash.Md5Hash;
 import org.apache.shiro.crypto.hash.SimpleHash;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.DigestUtils;
+
+import com.example.demo.common.Dict;
+import com.example.demo.entity.User;
+import com.example.demo.exception.ExceptionEnums;
+import com.example.demo.exception.SystemException;
+import com.example.demo.service.UserService;
 
 /**
  * 公共方法类
@@ -20,6 +28,12 @@ import org.springframework.util.DigestUtils;
  */
 public class Util {
 
+	/** 图片访问的路径前缀 @Value 无法给static进行赋值**/
+	@Value("${image.access.url}")
+	private String imageAccessPref;
+	@Autowired
+	UserService userService;
+	
 	/**
 	 * MD5加密
 	 * 
@@ -63,6 +77,31 @@ public class Util {
 
 		}
 		return "";
+	}
+	
+	/**
+	 * 图片的访问前缀
+	 * @return
+	 */
+	public String getImageAccessPref() {
+		return this.imageAccessPref;
+	}
+	
+	/**
+	 * 用户状态校验
+	 * @return
+	 * @throws SystemException 
+	 */
+	public static boolean userVerify(User user) throws SystemException {
+		if(user == null) {
+			throw new SystemException(ExceptionEnums.USER_NOT_EXIT);
+		}
+		if(Dict.LOCKED_STATUS.equals(user.getUserStatus())) {
+			throw new SystemException(ExceptionEnums.USERSTATUS_IS_LOCK);
+		}else if(Dict.INVALID_STATUS.equals(user.getUserStatus())) {
+			throw new SystemException(ExceptionEnums.USERSTATUS_IS_INVALID);
+		}
+		return true;
 	}
 
 	public static void ShiroPasswordWithSalt() {

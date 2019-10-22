@@ -98,7 +98,14 @@ public class BaseServiceImpl<E> implements BaseService<E>{
 
 	@Override
 	public int total(QueryWrapper<E> queryWrapper) throws SystemException {
-		return 1;
+		int i = 0;
+		try {
+			i = baseMapper.selectCount(queryWrapper);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new SystemException(ExceptionEnums.DATA_SELECT_FAIL);
+		}
+		return i;
 	}
 		
 

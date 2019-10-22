@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.CommentMapper">
+	<resultMap type="com.example.demo.entity.Comment"
+		id="commentResultMap">
+		<result property="commentId" column="comment_id" />
+		<result property="userId" column="user_id" />
+		<result property="userName" column="user_name" />
+		<result property="avatar" column="avatar" />
+		<result property="commentContent" column="comment_content" />
+		<result property="commentTime" column="comment_time" />
+		<collection property="replies" ofType="Reply">
+			<result property="replyId" column="reply_id" />
+			<result property="replyFromUserId" column="reply_from_user_id" />
+			<result property="replyFromUserName" column="reply_from_user_name" />
+			<result property="replyFromAvatar" column="reply_from_avatar" />
+			<result property="replyToUserName" column="reply_to_user_name" />
+			<result property="replyToUserId" column="reply_to_user_id" />
+			<result property="replyCommentId" column="reply_comment_id" />
+			<result property="replyContent" column="reply_content" />
+			<result property="replyTime" column="reply_time" />
+		</collection>
+	</resultMap>
+
+	<select id="queryCommentsWithRepies" parameterType="long"
+		resultMap="commentResultMap">
+		<!-- select * from `comment` left join reply on comment.comment_id = reply.reply_comment_id 
+			where `comment`.article_id = #{articleId} ; -->
+		select c.*,r.*,u.user_name,u.avatar,ur.user_name as
+		reply_from_user_name,ur.avatar as reply_from_avatar,
+		ut.user_name as reply_to_user_name from demo_comment c
+		left join reply r on c.comment_id = r.reply_comment_id
+		left join `user` u
+		on c.user_id = u.user_id
+		left join `user` ur on r.reply_from_user_id =
+		ur.user_id
+		left join `user` ut on r.reply_to_user_id = ut.user_id
+		where
+		c.article_id = #{articleId};
+	</select>
+
+	<select id="queryCommentsWithUser" parameterType="long"
+		resultType="Comment">
+		select * from demo_comment left join reply on
+		comment.comment_id = reply.reply_comment_id
+		where `comment`.article_id
+		= #{articleId} ;
+	</select>
+
+</mapper>

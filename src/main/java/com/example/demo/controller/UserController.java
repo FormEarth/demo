@@ -40,7 +40,7 @@ public class UserController {
 	
 	@CrossOrigin
 	@RequestMapping(value="/login",method = RequestMethod.POST)
-	public JSONResult userLogin(HttpServletRequest request, @RequestBody User  user) throws SystemException {
+	public JSONResult userLogin(@RequestBody User  user) throws SystemException {
 		Assert.notNull(user.getAccount(),"账号不能为空！");
 		Assert.notNull(user.getPassword(),"密码不能为空！");
 		UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken(user.getAccount(), user.getPassword());
@@ -100,7 +100,7 @@ public class UserController {
 		
 	}
 	
-	@RequestMapping(value="/logout",method = RequestMethod.GET)
+	@RequestMapping(value="/logout",method = RequestMethod.POST)
 	public JSONResult userLogout(HttpServletRequest request,@RequestBody User user) throws SystemException {
 		Subject subject = SecurityUtils.getSubject();
         //登出

@@ -18,6 +18,14 @@ import com.example.demo.service.ApiService;
 public class ApiController {
 	
 	//private static final Logger logger = LoggerFactory.getLogger(ApiController.class);
+	/**
+	 * 服务默认地址
+	 * @return
+	 */
+	@RequestMapping(value= {"/"},method = RequestMethod.GET)
+	public JSONResult index() {
+		return JSONResult.success();
+	}
 	
 	@Autowired
 	ApiService apiService;

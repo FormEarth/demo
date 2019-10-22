@@ -5,7 +5,6 @@ import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.SimpleAuthenticationInfo;
-import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
@@ -13,7 +12,6 @@ import org.apache.shiro.util.ByteSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.demo.common.Dict;
@@ -98,7 +96,7 @@ public class ShiroRealm extends AuthorizingRealm {
 //		UsernamePasswordToken usernamePasswordToken = (UsernamePasswordToken) token;
 		
 		if(user == null) {
-			throw new AuthException(ExceptionEnums.ACCOUNT_NOT_EXIT);
+			throw new AuthException(ExceptionEnums.USER_NOT_EXIT);
 		}
 		if (Dict.LOCKED_STATUS.equals(user.getUserStatus())) {
 			throw new AuthException(ExceptionEnums.USERSTATUS_IS_LOCK);

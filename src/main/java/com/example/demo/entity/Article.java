@@ -14,12 +14,12 @@ import com.fasterxml.jackson.annotation.JsonFormat;
  * @date 2019年3月31日
  */
 
-@TableName(value = "artice")
-public class Artice {
+@TableName(value = "article")
+public class Article {
 
 	/** 文章id **/
-	@TableId(value = "artice_id", type = IdType.AUTO) // 指定该字段为自增策略
-	private long articeId;
+	@TableId(value = "article_id", type = IdType.AUTO) // 指定该字段为自增策略
+	private long articleId;
 	/** 作者姓名 **/
 	private String authorName;
 	/** 作者id(即用户id) **/
@@ -44,7 +44,7 @@ public class Artice {
 	private boolean comment;
 	/** 发布时间 **/
 	private Date sendTime;
-	/** 状态，0-创建；1-发布；3-未发布(草稿箱)；4-删除 **/
+	/** 状态，0-创建；1-发布；2-未发布(草稿箱)；3-删除 **/
 	private String status;
 	/** 浏览量 **/
 	private int readerNum;
@@ -64,7 +64,7 @@ public class Artice {
 
 	@Override
 	public String toString() {
-		return "Artice [articeId=" + articeId + ", authorName=" + authorName + ", author=" + author + ", title=" + title
+		return "Artice [articleId=" + articleId + ", authorName=" + authorName + ", author=" + author + ", title=" + title
 				+ ", frontCover=" + frontCover + ", summary=" + summary + ", content=" + content + ", tags=" + tags
 				+ ", codeStyle=" + codeStyle + ", personal=" + personal + ", anonymous=" + anonymous + ", comment="
 				+ comment + ", sendTime=" + sendTime + ", status=" + status + ", readerNum=" + readerNum + ", approval="
@@ -88,12 +88,12 @@ public class Artice {
 		return updateTime;
 	}
 
-	public long getArticeId() {
-		return articeId;
+	public long getArticleId() {
+		return articleId;
 	}
 
-	public void setArticeId(long articeId) {
-		this.articeId = articeId;
+	public void setArticleId(long articleId) {
+		this.articleId = articleId;
 	}
 
 	public long getAuthor() {
@@ -112,8 +112,10 @@ public class Artice {
 		this.title = title;
 	}
 
-	
 	public String getFrontCover() {
+		if (this.frontCover != null && !"".equals(this.frontCover)) {
+			return "http://192.168.149.110:9090/static" + this.frontCover;
+		}
 		return frontCover;
 	}
 

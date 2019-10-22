@@ -26,7 +26,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
 		QueryWrapper<User> wrapper = new QueryWrapper<User>().eq("account",account);
 		User user = userMapper.selectOne(wrapper);
 		if(user == null) {
-			throw new SystemException(ExceptionEnums.ACCOUNT_NOT_EXIT);
+			throw new SystemException(ExceptionEnums.USER_NOT_EXIT);
 		}
 		String str = Util.md5Digest(password + user.getSalt());
 		if(user.getPassword().equals(str)) {

@@ -30,9 +30,8 @@ public class ApiServiceImpl implements ApiService {
 	/** 图片文件保存的路径 **/
 	@Value("${image.upload.path}")
 	private String path;
-	/** 图片访问的路径前缀 **/
 	@Value("${image.access.url}")
-	private String imageURL;
+	private String imageAccessPref;
 
 	@Override
 	public String singleImageUpload(MultipartFile image) throws SystemException {
@@ -61,7 +60,7 @@ public class ApiServiceImpl implements ApiService {
 		String uuid = UUID.randomUUID().toString().replace("-", "");
 		String fileName = image.getOriginalFilename();
 		fileName = uuid + fileName.substring(fileName.lastIndexOf("."));
-		String filePath = "original/" + fileName;
+		String filePath = "/upload/images/original/" + fileName;
 		logger.info("图片上传路径：" + path + filePath);
 		File imageFile = new File(path + filePath);
 		if (imageFile.getParentFile() != null || !imageFile.getParentFile().isDirectory()) {
@@ -82,7 +81,7 @@ public class ApiServiceImpl implements ApiService {
 
 		//double scale = 0.8d;
 		// 压缩图片地址
-		String thumbnailFilePath = "thumbnail/" + fileName;
+		String thumbnailFilePath = "/upload/images/thumbnail/" + fileName;
 		File outFile = new File(path + thumbnailFilePath);
 		logger.info("压缩图片路径"+path + thumbnailFilePath);
 		if(!outFile.exists()) outFile.getParentFile().mkdirs();
@@ -92,14 +91,18 @@ public class ApiServiceImpl implements ApiService {
 			try {
 				if (addWatermark) {
 					Thumbnails.of(path + filePath)
-					.size(400, 500)
+//					.size(400, 500)
+//					.outputFormat("jpg")					
 					.watermark(Positions.BOTTOM_LEFT, ImageUtil.waterMarkByText(watermark), 0.8f)
-					.outputFormat("jpg")
+					.scale(1f)
+					.outputQuality(0.25f)
 					.toFile(outFile);
 				}else {
 					Thumbnails.of(path + filePath)
-					.size(400, 500)
-					.outputFormat("jpg")
+//					.size(400, 500)
+//					.outputFormat("jpg")
+					.scale(1f)
+					.outputQuality(0.25f)
 					.toFile(outFile);
 				}
 			} catch (Exception ex) {
@@ -109,9 +112,9 @@ public class ApiServiceImpl implements ApiService {
 			}
 		}
 		if(compression||addWatermark){
-			return imageURL + thumbnailFilePath;
+			return imageAccessPref + thumbnailFilePath;
 		}else {
-			return imageURL + filePath;
+			return imageAccessPref + filePath;
 		}	
 
 	}

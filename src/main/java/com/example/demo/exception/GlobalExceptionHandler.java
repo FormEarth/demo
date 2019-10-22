@@ -1,7 +1,5 @@
 package com.example.demo.exception;
 
-import java.io.UnsupportedEncodingException;
-
 import javax.validation.ConstraintViolationException;
 
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -52,26 +50,13 @@ public class GlobalExceptionHandler {
      }
     
 	/**
-	 * 处理由Hibernate-Validator抛出的字段验证不通过的ConstraintViolationException
+	 * 处理由Hibernate-Validator抛出的字段验证不通过的ConstraintViolationException、MethodArgumentNotValidException
 	 * @param ex
 	 * @return
 	 */
-    @ExceptionHandler(value = ConstraintViolationException.class)
+    @ExceptionHandler(value = {ConstraintViolationException.class,MethodArgumentNotValidException.class})
 	public JSONResult constraintViolationExceptionHandler(ConstraintViolationException ex){
 		ex.printStackTrace();
-        return new JSONResult("4444", ex.getMessage());
-     }
-    
-	/**
-	 * 处理由Hibernate-Validator抛出的字段验证不通过的MethodArgumentNotValidException
-	 * @param ex
-	 * @return
-	 * @throws UnsupportedEncodingException 
-	 */
-    @ExceptionHandler(value = MethodArgumentNotValidException.class)
-	public JSONResult validatorExceptionHandler(MethodArgumentNotValidException ex) throws UnsupportedEncodingException{
-		ex.printStackTrace();
-		//new String(ex.getMessage().getBytes("ISO-8859-1"),"utf-8")
         return new JSONResult("4444", ex.getMessage());
      }
 	
