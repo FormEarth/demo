@@ -1,14 +1,13 @@
 package com.example.demo.entity;
 
-import java.util.List;
+import java.util.Date;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.example.demo.aop.annotation.StaticURL;
 import com.fasterxml.jackson.annotation.JsonFormat;
-
-import java.util.Date;
 
 /**
  * 
@@ -27,16 +26,25 @@ public class Comment {
 	String commentContent;
 	Date commentTime;
 	
+	@StaticURL
 	@TableField(exist=false)
 	String avatar;
 	@TableField(exist=false)
 	String userName;
-	/** 评论下面的回复 **/
 	@TableField(exist=false)
-	List<Reply> replies;
+	/** 评论下面的回复数 **/
+	long replyCount;
 	
+	public long getReplyCount() {
+		return replyCount;
+	}
+
+	public void setReplyCount(long replyCount) {
+		this.replyCount = replyCount;
+	}
+
 	public String getAvatar() {
-		return "http://192.168.149.110:9090/static" + avatar;
+		return avatar;
 	}
 
 	public void setAvatar(String avatar) {
@@ -55,7 +63,7 @@ public class Comment {
 	public String toString() {
 		return "Comment [commentId=" + commentId + ", userId=" + userId + ", articeId=" + articleId + ", commentContent="
 				+ commentContent + ", commentTime=" + commentTime + ", avatar=" + avatar + ", userName=" + userName
-				+ ", replies=" + replies + "]";
+				+ "]";
 	}
 
 	public long getCommentId() {
@@ -98,14 +106,5 @@ public class Comment {
 	public void setCommentTime(Date commentTime) {
 		this.commentTime = commentTime;
 	}
-
-	public List<Reply> getReplies() {
-		return replies;
-	}
-
-	public void setReplies(List<Reply> replies) {
-		this.replies = replies;
-	}
-
 
 }

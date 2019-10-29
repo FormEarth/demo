@@ -23,9 +23,9 @@ public class CommentServiceImlp extends BaseServiceImpl<Comment> implements Comm
 	ReplyMapper replyMapper;
 	
 	@Override
-	public List<Comment> queryCommentsWithRepies(long articeId) {
+	public List<Comment> queryCommentsWithUser(long articeId) {
 		List<Comment> comments = new ArrayList<>();
-		comments = commentMapper.queryCommentsWithRepies(articeId);
+		comments = commentMapper.queryCommentsWithUser(articeId);
 		return comments;
 	}
 
@@ -42,6 +42,16 @@ public class CommentServiceImlp extends BaseServiceImpl<Comment> implements Comm
 		int i = 0;
 		i = replyMapper.deleteById(replyId);
 		return i;
+	}
+
+	@Override
+	public List<Reply> queryRepliesWithUser(long commentId) throws SystemException {
+		List<Reply> replies = new ArrayList<>();
+		replies = commentMapper.queryRepliesWithUser(commentId);
+		if(replies.size()<1) {
+			throw new SystemException(ExceptionEnums.SELECT_DATA_IS_EMPTY);
+		}
+		return replies;
 	}
 	
 	

@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
@@ -53,7 +52,7 @@ public class ApiServiceImpl implements ApiService {
 		if (image == null) {
 			throw new SystemException(ExceptionEnums.IMAGE_FILE_NULL);
 		}
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+//		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 		// 年月日生成保存目录
 //		String directory = sdf.format(new Date()) + "/";
 		// uuid文件名

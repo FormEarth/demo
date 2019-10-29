@@ -9,6 +9,8 @@ public class Dict {
 
 	/** 已登录用户数据 **/
 	public static final String CURRENT_USER_DATA = "current_user_data";
+	/** 文件资源的访问前缀 **/
+	public static final String ACCESS_PREF = "access_pref";
 	/** 用户状态：正常   **/
 	public static final String NORMAL_STATUS = "0";
 	/** 用户状态：锁定   **/

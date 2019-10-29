@@ -22,7 +22,7 @@ public class ApiController {
 	 * 服务默认地址
 	 * @return
 	 */
-	@RequestMapping(value= {"/"},method = RequestMethod.GET)
+	@RequestMapping(value= "/",method = RequestMethod.GET)
 	public JSONResult index() {
 		return JSONResult.success();
 	}

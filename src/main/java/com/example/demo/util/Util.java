@@ -30,7 +30,7 @@ public class Util {
 
 	/** 图片访问的路径前缀 @Value 无法给static进行赋值**/
 	@Value("${image.access.url}")
-	private String imageAccessPref;
+	public String imageAccessPref;
 	@Autowired
 	UserService userService;
 	
@@ -144,7 +144,8 @@ public class Util {
 
 	public static void main(String[] args) {
 		// ShiroPasswordWithSalt();
-		System.out.println(randomStr(15));
+//		System.out.println(randomStr(15));
+//		Variable variable = new Variable();
 	}
 
 }

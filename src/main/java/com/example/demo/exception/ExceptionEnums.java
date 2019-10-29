@@ -49,6 +49,10 @@ public enum ExceptionEnums {
 	SOURCE_NOT_FOUND("1018","访问的资源不存在"),
 	/** 无权访问当前资源  */
 	SOURCE_NOT_PERMIT("1019","当前资源不允许访问"),
+	/** 未查询到指定数据  */
+	SELECT_DATA_IS_EMPTY("1020","未查询到相关结果"),
+	/** 请求数据非法  */
+	REQUEST_DATA_IS_ILLEGAL("1021","请求数据非法"),
 	/** 数据验证失败 */
 	FILED_VALIDATOR_ERROR("1111","数据验证失败"),
 	/** 默认的成功 */

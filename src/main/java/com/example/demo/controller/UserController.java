@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.demo.aop.annotation.StaticURL;
 import com.example.demo.common.Dict;
 import com.example.demo.entity.JSONDataResult;
 import com.example.demo.entity.JSONResult;
@@ -38,7 +39,7 @@ public class UserController {
 	@Autowired
 	UserService  userServiceImpl;
 	
-	@CrossOrigin
+	@StaticURL
 	@RequestMapping(value="/login",method = RequestMethod.POST)
 	public JSONResult userLogin(@RequestBody User  user) throws SystemException {
 		Assert.notNull(user.getAccount(),"账号不能为空！");
@@ -58,7 +59,7 @@ public class UserController {
 			
 		}
 		User currentUser = (User) SecurityUtils.getSubject().getPrincipal();
-        logger.info(Dict.CURRENT_USER_DATA + currentUser);
+		logger.info("当前登录用户信息："+currentUser);
 		return new JSONDataResult().add(Dict.CURRENT_USER_DATA,currentUser);
 	}
 	
@@ -69,6 +70,7 @@ public class UserController {
 		return JSONResult.success();
 	}
 	
+	@StaticURL
 	@RequestMapping(value="/users/{pageSize}",method = RequestMethod.GET)
 	public JSONResult getUsers(@PathVariable String pageSize) throws SystemException {
 		
@@ -82,22 +84,26 @@ public class UserController {
 		List<User> list = userServiceImpl.getAll(page, queryWrapper);
 		return  new JSONDataResult().add("user", list);
 	}
-	
-	//@RequestBody必须使用post请求方式
-	@RequestMapping(value="/add",method = RequestMethod.POST)
-	public JSONResult userAdd(
-			@RequestBody(required=false)  
-			@Valid
-			User user, BindingResult bingdingResult) throws SystemException {
-		System.out.println("user"+user);
-		System.out.println("mail"+user.getMail());
-		if(bingdingResult.hasErrors()) {
-			return new JSONResult("1111",bingdingResult.getObjectName());
-		}else {
-			return JSONResult.success();
+
+	/**
+	 * 用户个人信息修改
+	 * @param user 用户对象
+	 * @return
+	 * @throws SystemException
+	 */
+	@RequestMapping(value="/info",method = RequestMethod.PUT)
+	public JSONResult updateOwnInfo(@RequestBody User user) throws SystemException {
+		User currentLoginUser = (User) SecurityUtils.getSubject().getPrincipal();
+		//检查是否更新的是自己的信息
+		if(currentLoginUser.getUserId()!=user.getUserId()) {
+			throw new SystemException(ExceptionEnums.REQUEST_DATA_IS_ILLEGAL);
 		}
-		//userServiceImpl.add(user);
-		
+		user.setUpdater(user.getUserId());
+		int row = userServiceImpl.updateById(user);
+		if(row<1){
+			throw new SystemException(ExceptionEnums.DATA_UPDATE_FAIL);
+		}
+		return  JSONResult.success();
 	}
 	
 	@RequestMapping(value="/logout",method = RequestMethod.POST)

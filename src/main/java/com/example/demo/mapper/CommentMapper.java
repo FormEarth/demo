@@ -3,14 +3,23 @@ package com.example.demo.mapper;
 import java.util.List;
 
 import com.example.demo.entity.Comment;
+import com.example.demo.entity.Reply;
 
 public interface CommentMapper extends BaseMapper<Comment> {
 
 	/**
-	 * 查询评论及回复
+	 * 查询所有评论和评论用户信息
 	 * 
 	 * @param articleId 文章id
 	 * @return
 	 */
-	List<Comment> queryCommentsWithRepies(long articleId);
+	List<Comment> queryCommentsWithUser(long articleId);
+	
+	/**
+	 * 查询指定回复及其用户信息
+	 * 
+	 * @param commentId 评论id
+	 * @return
+	 */
+	List<Reply> queryRepliesWithUser(long commentId);
 }

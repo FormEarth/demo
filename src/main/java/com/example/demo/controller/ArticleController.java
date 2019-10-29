@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.example.demo.service.CommentService;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.session.Session;
 import org.slf4j.Logger;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.demo.aop.annotation.StaticURL;
 import com.example.demo.common.Dict;
 import com.example.demo.entity.Article;
 import com.example.demo.entity.Comment;
@@ -39,16 +41,14 @@ import com.example.demo.util.Util;
 public class ArticleController {
 
 	private static final Logger logger = LoggerFactory.getLogger(ArticleController.class);
-
-	@Value("${image.access.url}")
-	private String imageAccessPref;
 	
 	@Autowired
 	ArticleService articleService;
 	@Autowired
 	UserService userService;
 	@Autowired
-	CommentMapper commentMaper;
+	CommentService commentService;
+
 	
 	/**
 	 * 获取所有长文(首页数据加载、分页)
@@ -66,21 +66,20 @@ public class ArticleController {
 		long current = Long.valueOf(currentPage);
 		
 		Page<Article> page = new Page<>(current,5);
-		//TODO 总页数
 		int total = articleService.total(queryWrapper);
 		List<Article> articles = articleService.getAll(page, queryWrapper);
-		logger.info("articles:"+articles);
 		return new JSONDataResult().add("articles", articles).add("total", total);
 		
 	}
 	
 	/**
 	 * 获取一个账号下的长文（个人主页数据，分页）
-	 * @param account 用户id
+	 * @param userId 用户id
 	 * @param currentPage 当前页
 	 * @return 分页数据和用户信息
 	 * @throws SystemException
 	 */
+	@StaticURL
 	@RequestMapping(value="/{userId}/articles/{currentPage}",method = RequestMethod.GET)
 	public JSONResult getarticlesByAccount(@PathVariable long userId,@PathVariable String currentPage) throws SystemException {
 
@@ -102,10 +101,11 @@ public class ArticleController {
 	
 	/**
 	 * 根据Id获取文章详情
-	 * @param article
+	 * @param articleId
 	 * @return
 	 * @throws SystemException 
 	 */
+	@StaticURL
 	@RequestMapping(value="/article/{articleId}",method = RequestMethod.GET)
 	public JSONResult getarticle(@PathVariable String articleId) throws SystemException {
 		
@@ -121,9 +121,11 @@ public class ArticleController {
 		List<Comment> comments = new ArrayList<>();
 		//允许评论时查询评论数据
 		if(article.isComment()) {
-			comments = commentMaper.queryCommentsWithRepies(Long.valueOf(articleId));
+			comments = commentService.queryCommentsWithUser(Long.valueOf(articleId));
 		}
-		logger.info("comment:"+comments);
+		//将阅读量+1
+		article.setReaderNum(article.getReaderNum()+1);
+		articleService.updateById(article);
 		return new JSONDataResult().add("article", article).add("comments", comments);
 		
 	}
@@ -188,7 +190,7 @@ public class ArticleController {
 	
 	/**
 	 * 删除长文
-	 * @param article
+	 * @param articleId
 	 * @return
 	 * @throws SystemException 
 	 */

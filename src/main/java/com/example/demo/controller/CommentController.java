@@ -1,15 +1,19 @@
 package com.example.demo.controller;
 
+
 import java.util.Date;
+import java.util.List;
 
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.example.demo.aop.annotation.StaticURL;
 import com.example.demo.entity.Comment;
 import com.example.demo.entity.JSONDataResult;
 import com.example.demo.entity.JSONResult;
@@ -38,6 +42,20 @@ public class CommentController {
 	public JSONResult deleteComment(long commentId) throws SystemException {
 		commentService.delete(new QueryWrapper<Comment>().eq("comment_id", commentId));
 		return JSONResult.success();
+	}
+	
+	/**
+	 * 查询指定评论id下的所有回复
+	 * @param commentId 评论id
+	 * @return
+	 * @throws SystemException 未查询到数据
+	 */
+	//TODO 分页
+	@StaticURL
+	@RequestMapping(value = { "/{commentId}/replies" }, method = RequestMethod.GET)
+	public JSONResult getRepliesByCommentId(@PathVariable long commentId) throws SystemException {
+		List<Reply> replies = commentService.queryRepliesWithUser(commentId);
+		return new JSONDataResult().add("replies",replies );
 	}
 	
 	@RequestMapping(value = { "/reply" }, method = RequestMethod.POST)

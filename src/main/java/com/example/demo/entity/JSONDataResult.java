@@ -1,6 +1,7 @@
 package com.example.demo.entity;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import com.example.demo.exception.ExceptionEnums;
 /**
@@ -34,6 +35,16 @@ public class JSONDataResult extends JSONResult {
 	 */
 	public JSONDataResult add(String key,Object data) {
 		this.data.put(key, data);
+		return this;
+	}
+
+	/**
+	 * 批量增加返回数据，可链式调用
+	 * @param map
+	 * @return
+	 */
+	public JSONDataResult addAll(Map<String, Object> map) {
+		this.data.putAll(map);
 		return this;
 	}
 

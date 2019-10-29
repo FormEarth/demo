@@ -5,11 +5,11 @@ import java.util.Date;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.example.demo.aop.annotation.StaticURL;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 /**
- * 
- * @description 文章
+ *  文章
  * @author raining_heavily
  * @date 2019年3月31日
  */
@@ -27,6 +27,7 @@ public class Article {
 	/** 文章标题 **/
 	private String title;
 	/** 文章封面 **/
+	@StaticURL
 	private String frontCover;
 	/** 文章摘要 **/
 	private String summary;
@@ -113,9 +114,6 @@ public class Article {
 	}
 
 	public String getFrontCover() {
-		if (this.frontCover != null && !"".equals(this.frontCover)) {
-			return "http://192.168.149.110:9090/static" + this.frontCover;
-		}
 		return frontCover;
 	}
 

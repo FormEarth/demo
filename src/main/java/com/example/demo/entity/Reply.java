@@ -13,6 +13,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.example.demo.aop.annotation.StaticURL;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 @TableName(value = "reply")
@@ -26,6 +27,7 @@ public class Reply {
 	String replyContent;
 	Date replyTime;
 
+	@StaticURL
 	@TableField(exist = false)
 	String replyFromAvatar;
 	@TableField(exist = false)
@@ -91,7 +93,7 @@ public class Reply {
 	}
 
 	public String getReplyFromAvatar() {
-		return "http://192.168.149.110:9090/static" + replyFromAvatar;
+		return replyFromAvatar;
 	}
 
 	public void setReplyFromAvatar(String replyFromAvatar) {
