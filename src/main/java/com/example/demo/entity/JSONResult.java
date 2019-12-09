@@ -1,6 +1,5 @@
 package com.example.demo.entity;
 
-import com.alibaba.fastjson.annotation.JSONType;
 import com.example.demo.exception.ExceptionEnums;
 import com.example.demo.util.Util;
 
@@ -11,7 +10,6 @@ import com.example.demo.util.Util;
  * @author Nidhogg
  * @date 2019年1月27日
  */
-@JSONType(orders = { "code", "mesage", "time" })
 public class JSONResult {
 
 	/** 状态码 */

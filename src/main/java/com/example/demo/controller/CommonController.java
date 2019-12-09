@@ -17,10 +17,10 @@ public class CommonController {
 	 * 访问默认接口时转发到分页接口
 	 * @return
 	 */
-	@RequestMapping(value= {"/demo/api/artices"},method = RequestMethod.GET)
-	public String getArtices() {
+	@RequestMapping(value= {"/articles"},method = RequestMethod.GET)
+	public String getArticles() {
 		//默认接口转发到第一页
-		return "forward:/demo/api/artices/1";
+		return "forward:/demo/api/articles/1";
 	}
 	
 }

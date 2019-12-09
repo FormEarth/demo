@@ -1,5 +1,6 @@
 package com.example.demo.util;
 
+import javax.imageio.ImageIO;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Font;
@@ -7,6 +8,11 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Date;
 
 /**
  * 
@@ -72,34 +78,43 @@ public class ImageUtil {
 		float realWidth = getRealFontWidth(text);
 		float fontSize = font.getSize();
 		System.out.println("----------------"+realWidth+","+fontSize);
+		System.out.println("----------------y:"+(width-realWidth));
 		// 计算绘图偏移x、y，使得使得水印文字在图片中居中
 		// 这里需要理解x、y坐标是基于Graphics2D.rotate过后的坐标系
-		//float x = 0.5f * width - 0.5f * fontSize * realWidth;
+//		float x = 0.5f * width - 0.5f * fontSize * realWidth;
 		float y = 0.5f * heigth + 0.5f * fontSize;
+		//设置抗锯齿
+		g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 		// 取绘制的字串宽度、高度中间点进行偏移，使得文字在图片坐标中居中
-		g2d.drawString(text, 0, y);
+		g2d.drawString(text, 100, 45);
 		// 释放资源
 		g2d.dispose();
+//		File file = new File("E:/User/pictures/static/upload/images/test/thumbnail/"+new Date().getTime()+".png");
+//		try {
+//			ImageIO.write(buffImg,"png",file);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
 		return buffImg;
 
 	}
 
 	public static BufferedImage waterMarkByText(int width, int heigth, String text, Color color, float alpha) {
 		// jdk默认字体
-		Font font = new Font("微软雅黑", Font.PLAIN, 15);
+		Font font = new Font("Times New Roman", Font.PLAIN, 30);
 		return waterMarkByText(width, heigth, text, color, font, -30d, alpha);
 	}
 
-	public static BufferedImage waterMarkByText(int width, int heigth, String text, float alpha) {
-		return waterMarkByText(width, heigth, text, Color.WHITE, alpha);
+	public static BufferedImage waterMarkByText(int width, int height, String text, float alpha) {
+		return waterMarkByText(width, height, text, Color.white, alpha);
 	}
 
-	public static BufferedImage waterMarkByText(int width, int heigth, String text) {
-		return waterMarkByText(width, heigth, text, 1.0f);
+	public static BufferedImage waterMarkByText(int width, int height, String text) {
+		return waterMarkByText(width, height, text, 1.0f);
 	}
 
 	public static BufferedImage waterMarkByText(String text) {
-		return waterMarkByText(150, 25, text);
+		return waterMarkByText(200, 50, text);
 	}
 
 	/**

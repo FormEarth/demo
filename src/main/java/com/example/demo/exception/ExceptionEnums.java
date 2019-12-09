@@ -14,7 +14,7 @@ public enum ExceptionEnums {
 	/** 用户未登录 */
 	USER_NOT_LOGIN("1002","用户未登录"),
 	/** 登录状态超时 */
-	LOGIN_STATUS_TIME("1003","登录状态超时"),
+	LOGIN_STATUS_TIMEOUT("1003","登录状态已失效"),
 	/** 登录失败 */
 	LOGIN_FAIL("1004","登录失败"),
 	/** 未知异常 */
@@ -22,9 +22,9 @@ public enum ExceptionEnums {
 	/** 权限不足 */
 	UNAUTH_ERROR("1006","您没有权限访问该功能"),
 	/** 用户被锁定 */
-	USERSTATUS_IS_LOCK("1007","当前用户被锁定"),
+	USER_STATUS_IS_LOCK("1007","当前用户被锁定"),
 	/** 用户已注销 */
-	USERSTATUS_IS_INVALID("1008","用户已注销"),
+	USER_STATUS_IS_INVALID("1008","用户已注销"),
 	/** 404 */
 	API_NOT_FOUND("404","请求地址不存在"),
 	/** 文件写入失败 */
@@ -55,6 +55,8 @@ public enum ExceptionEnums {
 	REQUEST_DATA_IS_ILLEGAL("1021","请求数据非法"),
 	/** 数据验证失败 */
 	FILED_VALIDATOR_ERROR("1111","数据验证失败"),
+	/** 在唯一索引行内插入重复数据 */
+	SQL_DUPLICATE_ENTRY("1112","数据已存在"),
 	/** 默认的成功 */
 	DEFAULT_SUCCESS("2000","请求成功"),
 	/** 服务器异常 */
@@ -77,9 +79,11 @@ public enum ExceptionEnums {
 	}
 
     public static ExceptionEnums statOf(String code) {
-        for (ExceptionEnums state : values())
-            if (state.getCode().equals(code))
-                return state;
+        for (ExceptionEnums state : values()) {
+			if (state.getCode().equals(code)) {
+				return state;
+			}
+		}
         return null;
     }
     

@@ -11,102 +11,120 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.demo.exception.ExceptionEnums;
 import com.example.demo.exception.SystemException;
 import com.example.demo.service.BaseService;
+import org.springframework.dao.DuplicateKeyException;
+
 /**
  * BaseService的实现类，该类同样需要一个泛型
- * @Description 
+ * @Description
  * @author raining_heavily
  * @date 2019年2月21日
  */
 public class BaseServiceImpl<E> implements BaseService<E>{
 
-	@Autowired
-	BaseMapper<E> baseMapper;
-	
-	@Override
-	public int add(E entity) throws SystemException {	
-		int i = 0;
-		try {
-			i = baseMapper.insert(entity);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new SystemException(ExceptionEnums.DATA_INSERT_FAIL);
-		}
-		if(i < 1) throw new SystemException(ExceptionEnums.DATA_INSERT_FAIL);
-		return i;
-	}
+    @Autowired
+    BaseMapper<E> baseMapper;
 
-	@Override
-	public int delete(QueryWrapper<E> queryWrapper) throws SystemException {
-		int i = 0;
-		try {
-			i = baseMapper.delete(queryWrapper);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new SystemException(ExceptionEnums.DATA_DELETE_FAIL);
-		}
-		if(i < 1) throw new SystemException(ExceptionEnums.DATA_DELETE_FAIL);
-		return i;
-	}
+    @Override
+    public int add(E entity) throws SystemException {
+        int i = 0;
+        try {
+            i = baseMapper.insert(entity);
+        } catch (Exception e) {
+            e.printStackTrace();
+            if(e instanceof DuplicateKeyException){
+                throw new SystemException(ExceptionEnums.SQL_DUPLICATE_ENTRY);
+            }
+            throw new SystemException(ExceptionEnums.DATA_INSERT_FAIL);
+        }
+        if(i < 1) throw new SystemException(ExceptionEnums.DATA_INSERT_FAIL);
+        return i;
+    }
 
-	@Override
-	public E getOne(QueryWrapper<E> queryWrapper) throws SystemException {
-		E entity = null;
-		try {
-			entity = baseMapper.selectOne(queryWrapper);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new SystemException(ExceptionEnums.DATA_SELECT_FAIL);
-		}
-		return entity;
-	}
+    @Override
+    public int delete(QueryWrapper<E> queryWrapper) throws SystemException {
+        int i = 0;
+        try {
+            i = baseMapper.delete(queryWrapper);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new SystemException(ExceptionEnums.DATA_DELETE_FAIL);
+        }
+        if(i < 1) throw new SystemException(ExceptionEnums.DATA_DELETE_FAIL);
+        return i;
+    }
 
-	@Override
-	public List<E> getAll(Page<E> page, QueryWrapper<E> queryWrapper) throws SystemException {
-		List<E> list = new ArrayList<>();
-		try {
-			list = baseMapper.selectPage(page, queryWrapper).getRecords();
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new SystemException(ExceptionEnums.DATA_SELECT_FAIL);
-		}
-		return list;
-	}
+    @Override
+    public E getOne(QueryWrapper<E> queryWrapper) throws SystemException {
+        E entity = null;
+        try {
+            entity = baseMapper.selectOne(queryWrapper);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new SystemException(ExceptionEnums.DATA_SELECT_FAIL);
+        }
+        return entity;
+    }
 
-	@Override
-	public int update(E entity, QueryWrapper<E> queryWrapper) throws SystemException {
-		int i = 0;
-		try {
-			i = baseMapper.update(entity, queryWrapper);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new SystemException(ExceptionEnums.DATA_UPDATE_FAIL);
-		}
-		return i;
-	}
+    @Override
+    public E getOneById(long id) throws SystemException {
+        E entity = null;
+        try {
+            entity = baseMapper.selectById(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new SystemException(ExceptionEnums.DATA_SELECT_FAIL);
+        }
+        if(entity==null) throw new SystemException(ExceptionEnums.DATA_SELECT_FAIL);
+        return entity;
+    }
 
-	@Override
-	public int updateById(E entity) throws SystemException {
-		int i = 0;
-		try {
-			i= baseMapper.updateById(entity);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new SystemException(ExceptionEnums.DATA_UPDATE_FAIL);
-		}
-		return i;
-	}
+    @Override
+    public List<E> getAll(Page<E> page, QueryWrapper<E> queryWrapper) throws SystemException {
+        List<E> list = new ArrayList<>();
+        try {
+            list = baseMapper.selectPage(page, queryWrapper).getRecords();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new SystemException(ExceptionEnums.DATA_SELECT_FAIL);
+        }
+        return list;
+    }
 
-	@Override
-	public int total(QueryWrapper<E> queryWrapper) throws SystemException {
-		int i = 0;
-		try {
-			i = baseMapper.selectCount(queryWrapper);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new SystemException(ExceptionEnums.DATA_SELECT_FAIL);
-		}
-		return i;
-	}
-		
+    @Override
+    public int update(E entity, QueryWrapper<E> queryWrapper) throws SystemException {
+        int i = 0;
+        try {
+            i = baseMapper.update(entity, queryWrapper);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new SystemException(ExceptionEnums.DATA_UPDATE_FAIL);
+        }
+        return i;
+    }
+
+    @Override
+    public int updateById(E entity) throws SystemException {
+        int i = 0;
+        try {
+            i= baseMapper.updateById(entity);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new SystemException(ExceptionEnums.DATA_UPDATE_FAIL);
+        }
+        return i;
+    }
+
+    @Override
+    public int total(QueryWrapper<E> queryWrapper) throws SystemException {
+        int i = 0;
+        try {
+            i = baseMapper.selectCount(queryWrapper);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new SystemException(ExceptionEnums.DATA_SELECT_FAIL);
+        }
+        return i;
+    }
+
 
 }

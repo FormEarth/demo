@@ -63,8 +63,11 @@ public class ShiroConfig {
 
         // 过滤链定义，从上向下顺序执行，一般将 /**放在最为下边 这是一个坑呢，一不小心代码就不好使了;
         // authc:所有url都必须认证通过才可以访问; anon:所有url都都可以匿名访问
-        filterChainMap.put("/demo/api/article", "user");//文章添加
-        filterChainMap.put("/demo/api/comment", "user");//评论相关
+//        filterChainMap.put("/demo/api/user/info", "user");//修改个人信息
+//        filterChainMap.put("/demo/api/user/avatar", "user");//修改个人信息
+//        filterChainMap.put("/demo/api/article", "user");//文章添加
+//        filterChainMap.put("/demo/api/comment", "user");//评论相关
+//        filterChainMap.put("/tag", "user");//创建标签
         filterChainMap.put("/**", "anon");
 
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainMap);
@@ -76,7 +79,7 @@ public class ShiroConfig {
     public SecurityManager securityManager(){
         DefaultWebSecurityManager securityManager =  new DefaultWebSecurityManager();
         securityManager.setRealm(shiroRealm());
-//        securityManager.setSessionManager(sessionManager());
+        securityManager.setSessionManager(sessionManager());
         return  securityManager;
     }
     
@@ -87,17 +90,20 @@ public class ShiroConfig {
     @Bean
     public ShiroRealm shiroRealm(){
         ShiroRealm shiroRealm=new ShiroRealm();
-        //shiroRealm.setCredentialsMatcher(new CredentialMatcher());
         shiroRealm.setCredentialsMatcher(hashedCredentialsMatcher());
         return shiroRealm;
     }
-    
-    //会话管理器
+
+    /**
+     * 会话管理器
+     * @return
+     */
     @Bean
     public SessionManager sessionManager() {
-        DefaultWebSessionManager sessionManager = new DefaultWebSessionManager();
+        //自定义的sessionManager
+        DefaultWebSessionManager sessionManager = new com.example.demo.shiro.SessionManager();
         sessionManager.setSessionIdUrlRewritingEnabled(false);
-        sessionManager.setGlobalSessionTimeout(1 * 60 * 60 * 1000);
+        sessionManager.setGlobalSessionTimeout(60 * 60 * 1000);
         sessionManager.setDeleteInvalidSessions(true);
         //sessionManager.setSessionIdCookie(simpleCookie());
         return sessionManager;

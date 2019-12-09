@@ -37,6 +37,21 @@ public interface UserService extends BaseService<User>{
 	 * @return 用户对象
 	 */
 	public List<User> getUsersByParams(Page<User> page, QueryWrapper<User> queryWrapper);
-	
-	
+
+	/**
+	 * 修改用户信息
+	 * @param user
+	 * @throws SystemException
+	 */
+	public void update(User user) throws SystemException;
+
+	/**
+	 * 查询用户的普通信息，用户名、头像、签名等
+	 *
+	 * @param id 用户Id
+	 * @return
+	 * @throws SystemException 未查到指定用户、用户被锁定、已注销
+	 */
+	public User queryCommonInfo(long id) throws SystemException;
+
 }

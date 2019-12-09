@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.TagMapper">
+
+    <!-- 模糊查询标签 -->
+    <select id="queryTagsWithText" parameterType="String"
+            resultType="com.example.demo.entity.Tag">
+        select * from demo_tag where tag_status = 1
+        <if test="searchText != null and searchText!=''">
+            and tag_text like CONCAT(#{searchText},'%')
+        </if>
+        order by tag_hot desc limit 5;
+    </select>
+
+    <update id="updateTagHotById" parameterType="long">
+        update demo_tag set tag_hot = tag_hot + 1 where tag_id = #{tagId}
+    </update>
+
+</mapper>

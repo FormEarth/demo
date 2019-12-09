@@ -14,9 +14,9 @@ import com.baomidou.mybatisplus.annotation.TableName;
 public class UserRole {
 	
 	@TableId
-	/*用户id*/
+	/** 用户id **/
 	private long userId;
-	/*角色id*/
+	/** 角色id **/
 	private long roleId;
 	
 	@Override

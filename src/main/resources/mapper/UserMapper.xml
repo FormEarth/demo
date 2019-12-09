@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.UserMapper">
+    <!--自定义update语句，MP在生成sql时会判断null来决定更新哪些字段，但基本类型在初始化时不是null-->
+    <update id="updateOwnInfo" parameterType="com.example.demo.entity.User">
+        update `user`
+        <set>
+            <if test="userName != null">
+                user_name = #{userName},
+            </if>
+            <if test="sign != null">
+                sign = #{sign},
+            </if>
+            <if test="personalProfile != null">
+                personal_profile = #{personalProfile},
+            </if>
+            <if test="birthday != null">
+                birthday = #{birthday},
+            </if>
+            <if test="avatar != null">
+                avatar = #{avatar},
+            </if>
+            <if test="frontCover != null">
+                front_cover = #{frontCover},
+            </if>
+            <if test="sex != null">
+                sex = #{sex},
+            </if>
+            <if test="updater != null">
+                updater = #{updater},
+            </if>
+        </set>
+        where user_id = #{userId}
+    </update>
+
+</mapper>

@@ -4,44 +4,24 @@ import java.io.Serializable;
 
 import org.apache.shiro.authc.AuthenticationException;
 
-public class AuthException extends AuthenticationException implements Serializable{
+/**
+ * @author chunyangwang
+ */
+public class AuthException extends AuthenticationException implements Serializable {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	
-	private String code;
-	private String msg;
-	private ExceptionEnums exceptionEnums;
-	
-    
-    public AuthException(ExceptionEnums exceptionEnums){
-    	super(exceptionEnums.name());
-        this.code = exceptionEnums.getCode(); 
-        this.msg = exceptionEnums.getMessage();
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
+
+    private ExceptionEnums exceptionEnums;
+
+    public AuthException(ExceptionEnums exceptionEnums) {
         this.exceptionEnums = exceptionEnums;
     }
 
-	public void setCode(String code) {
-		this.code = code;
-	}
+    public ExceptionEnums getExceptionEnums() {
+        return exceptionEnums;
+    }
 
-	public void setMsg(String msg) {
-		this.msg = msg;
-	}
-
-	public String getCode() {
-		return code;
-	}
-
-	public String getMsg() {
-		return msg;
-	}
-
-	public ExceptionEnums getExceptionEnums() {
-		return exceptionEnums;
-	}
-	
-	
 }

@@ -3,7 +3,7 @@
 <mapper namespace="com.example.demo.mapper.PermissionMapper">
 
     <!--根据账号获取所有权限-->
-    <select id="getPermissionsByAccount" parameterType="String" resultType="Permission">
+    <select id="getPermissionsByAccount" parameterType="String" resultType="com.example.demo.entity.Permission">
     	select permission.* from`user`
     		join user_role u on `user`.user_id =u.user_id
     		join role on u.`role _id` = role.role_id

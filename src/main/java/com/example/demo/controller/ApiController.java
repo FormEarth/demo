@@ -1,6 +1,9 @@
 package com.example.demo.controller;
 
 
+import com.example.demo.aop.annotation.StaticURL;
+import com.example.demo.common.Dict;
+import com.example.demo.common.FileSourceEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -13,8 +16,10 @@ import com.example.demo.entity.JSONResult;
 import com.example.demo.exception.SystemException;
 import com.example.demo.service.ApiService;
 
+/**
+ * @author raining_heavily
+ */
 @RestController
-@RequestMapping(value="/demo/api")
 public class ApiController {
 	
 	//private static final Logger logger = LoggerFactory.getLogger(ApiController.class);
@@ -29,11 +34,12 @@ public class ApiController {
 	
 	@Autowired
 	ApiService apiService;
-	
+
+	@StaticURL
 	@RequestMapping(value="/image",method=RequestMethod.POST)
 	public JSONResult imageUpload(@RequestParam("image") MultipartFile file) throws SystemException {
 		
-		String imageURL = apiService.singleImageUploadWithoutWatermark(file);
-		return new JSONDataResult().add("imageURL", imageURL);
+		String relativePath = apiService.singleImageUpload(file, Dict.GLOBAL_WATERMARK, FileSourceEnum.ARTICLE);
+		return new JSONDataResult().add("relativePath", relativePath);
 	}
 }

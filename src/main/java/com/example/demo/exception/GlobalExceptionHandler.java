@@ -35,7 +35,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = SystemException.class)
 	public JSONResult systemExceptionHandler(SystemException ex){
 		ex.printStackTrace();
-        return new JSONResult(ex.getCode(), ex.getMessage());
+        return new JSONResult(ex.getExceptionEnums().getCode(),ex.getExceptionEnums().getMessage());
      }
 	
 	/**
@@ -65,7 +65,6 @@ public class GlobalExceptionHandler {
 	 * @param ex
 	 * @return
 	 */
-	//@ResponseBody  //在返回自定义相应类的情况下必须有
     @ExceptionHandler(value = RuntimeException.class)
 	public JSONResult exceptionHandler(RuntimeException ex){
 		ex.printStackTrace();

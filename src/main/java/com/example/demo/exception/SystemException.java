@@ -12,21 +12,18 @@ import java.io.Serializable;
 public class SystemException extends Exception implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
-	private String code;
-	private String message;
-    
+
+    private ExceptionEnums exceptionEnums;
+
+    public SystemException(){
+        this.exceptionEnums = ExceptionEnums.DEFAULT_FAIL;
+    }
+
     public SystemException(ExceptionEnums exceptionEnums){
-    	super(exceptionEnums.name());
-        this.code = exceptionEnums.getCode(); 
-        this.message = exceptionEnums.getMessage();
+        this.exceptionEnums = exceptionEnums;
     }
 
-    public String getCode() {
-        return code;
-    }
-
-    public String getMessage() {
-        return message;
+    public ExceptionEnums getExceptionEnums() {
+        return exceptionEnums;
     }
 }

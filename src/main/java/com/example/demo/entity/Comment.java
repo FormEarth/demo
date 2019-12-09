@@ -10,7 +10,6 @@ import com.example.demo.aop.annotation.StaticURL;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 /**
- * 
  * @author raining_heavily
  * @date 2019年10月16日
  * @time 下午7:51:14
@@ -18,93 +17,92 @@ import com.fasterxml.jackson.annotation.JsonFormat;
  */
 @TableName(value = "demo_comment")
 public class Comment {
-	
-	@TableId(value = "comment_id", type = IdType.AUTO)
-	long commentId;
-	long userId;
-	long articleId;
-	String commentContent;
-	Date commentTime;
-	
-	@StaticURL
-	@TableField(exist=false)
-	String avatar;
-	@TableField(exist=false)
-	String userName;
-	@TableField(exist=false)
-	/** 评论下面的回复数 **/
-	long replyCount;
-	
-	public long getReplyCount() {
-		return replyCount;
-	}
 
-	public void setReplyCount(long replyCount) {
-		this.replyCount = replyCount;
-	}
+    @TableId(value = "comment_id", type = IdType.AUTO)
+    private Long commentId;
+    private Long userId;
+    private Long articleId;
+    private String commentContent;
+    private Date commentTime;
+    @StaticURL
+    @TableField(exist = false)
+    private String avatar;
+    @TableField(exist = false)
+    private String userName;
+    @TableField(exist = false)
+    /** 评论下面的回复数 **/
+    private Long replyCount;
 
-	public String getAvatar() {
-		return avatar;
-	}
+    @Override
+    public String toString() {
+        return "Comment [commentId=" + commentId + ", userId=" + userId + ", articeId=" + articleId + ", commentContent="
+                + commentContent + ", commentTime=" + commentTime + ", avatar=" + avatar + ", userName=" + userName
+                + "]";
+    }
 
-	public void setAvatar(String avatar) {
-		this.avatar = avatar;
-	}
+    public String getAvatar() {
+        return avatar;
+    }
 
-	public String getUserName() {
-		return userName;
-	}
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
 
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
+    public String getUserName() {
+        return userName;
+    }
 
-	@Override
-	public String toString() {
-		return "Comment [commentId=" + commentId + ", userId=" + userId + ", articeId=" + articleId + ", commentContent="
-				+ commentContent + ", commentTime=" + commentTime + ", avatar=" + avatar + ", userName=" + userName
-				+ "]";
-	}
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
 
-	public long getCommentId() {
-		return commentId;
-	}
+    public Long getCommentId() {
+        return commentId;
+    }
 
-	public void setCommentId(long commentId) {
-		this.commentId = commentId;
-	}
+    public void setCommentId(Long commentId) {
+        this.commentId = commentId;
+    }
 
-	public long getUserId() {
-		return userId;
-	}
+    public Long getUserId() {
+        return userId;
+    }
 
-	public void setUserId(long userId) {
-		this.userId = userId;
-	}
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
-	public long getArticleId() {
-		return articleId;
-	}
+    public Long getArticleId() {
+        return articleId;
+    }
 
-	public void setArticleId(long articleId) {
-		this.articleId = articleId;
-	}
+    public void setArticleId(Long articleId) {
+        this.articleId = articleId;
+    }
 
-	public String getCommentContent() {
-		return commentContent;
-	}
+    public Long getReplyCount() {
+        return replyCount;
+    }
 
-	public void setCommentContent(String commentContent) {
-		this.commentContent = commentContent;
-	}
+    public void setReplyCount(Long replyCount) {
+        this.replyCount = replyCount;
+    }
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-	public Date getCommentTime() {
-		return commentTime;
-	}
+    public String getCommentContent() {
+        return commentContent;
+    }
 
-	public void setCommentTime(Date commentTime) {
-		this.commentTime = commentTime;
-	}
+    public void setCommentContent(String commentContent) {
+        this.commentContent = commentContent;
+    }
+
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
+    public Date getCommentTime() {
+        return commentTime;
+    }
+
+    public void setCommentTime(Date commentTime) {
+        this.commentTime = commentTime;
+    }
 
 }

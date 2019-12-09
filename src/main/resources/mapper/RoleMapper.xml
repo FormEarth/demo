@@ -3,7 +3,7 @@
 <mapper namespace="com.example.demo.mapper.RoleMapper">
 
     <!--根据账号获取所有角色-->
-    <select id="getRolesByAccount" parameterType="String" resultType="Role">
+    <select id="getRolesByAccount" parameterType="String" resultType="com.example.demo.entity.Role">
         select role.* from `user`,user_role u,role 
     		where  `user`.user_id = u.user_id 
     		and u.`role _id` = role.role_id 

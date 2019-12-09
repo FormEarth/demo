@@ -1,123 +1,185 @@
 package com.example.demo.controller;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authc.AuthenticationException;
-import org.apache.shiro.authc.UsernamePasswordToken;
-import org.apache.shiro.subject.Subject;
-import org.apache.shiro.util.Assert;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.demo.aop.annotation.StaticURL;
+import com.example.demo.common.CollectionTypeEnum;
 import com.example.demo.common.Dict;
+import com.example.demo.common.FileSourceEnum;
+import com.example.demo.entity.Collection;
 import com.example.demo.entity.JSONDataResult;
 import com.example.demo.entity.JSONResult;
 import com.example.demo.entity.User;
-import com.example.demo.exception.AuthException;
 import com.example.demo.exception.ExceptionEnums;
 import com.example.demo.exception.SystemException;
+import com.example.demo.service.ApiService;
+import com.example.demo.service.CollectionService;
 import com.example.demo.service.UserService;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.subject.Subject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-@Validated
+import java.util.Date;
+
+/**
+ * @author raniing_heavily
+ */
 @RestController
-@RequestMapping(value="/demo/api/user")
+@RequestMapping(value = "/user")
 public class UserController {
-	
-	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
-	
-	@Autowired
-	UserService  userServiceImpl;
-	
-	@StaticURL
-	@RequestMapping(value="/login",method = RequestMethod.POST)
-	public JSONResult userLogin(@RequestBody User  user) throws SystemException {
-		Assert.notNull(user.getAccount(),"账号不能为空！");
-		Assert.notNull(user.getPassword(),"密码不能为空！");
-		UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken(user.getAccount(), user.getPassword());
-        Subject subject = SecurityUtils.getSubject();
-        //登录
-        try {
-			subject.login(usernamePasswordToken);
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-			if(e instanceof AuthException) {
-				throw new SystemException(((AuthException) e).getExceptionEnums());
-			}else {
-				throw new SystemException(ExceptionEnums.PASSWORD_ERROR);
-			}
-			
-		}
-		User currentUser = (User) SecurityUtils.getSubject().getPrincipal();
-		logger.info("当前登录用户信息："+currentUser);
-		return new JSONDataResult().add(Dict.CURRENT_USER_DATA,currentUser);
-	}
-	
-	@RequestMapping(value="/register",method = RequestMethod.POST)
-	public JSONResult userRegister(User user) throws SystemException {
-		
-		userServiceImpl.userRegister(user);
-		return JSONResult.success();
-	}
-	
-	@StaticURL
-	@RequestMapping(value="/users/{pageSize}",method = RequestMethod.GET)
-	public JSONResult getUsers(@PathVariable String pageSize) throws SystemException {
-		
-		QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-		queryWrapper.eq("user_status", 1);
-		
-		long size = pageSize==null ? 1 : Long.valueOf(pageSize);
-		
-		Page<User> page = new Page<>(size,5);
-		page.setSize(5);
-		List<User> list = userServiceImpl.getAll(page, queryWrapper);
-		return  new JSONDataResult().add("user", list);
-	}
 
-	/**
-	 * 用户个人信息修改
-	 * @param user 用户对象
-	 * @return
-	 * @throws SystemException
-	 */
-	@RequestMapping(value="/info",method = RequestMethod.PUT)
-	public JSONResult updateOwnInfo(@RequestBody User user) throws SystemException {
-		User currentLoginUser = (User) SecurityUtils.getSubject().getPrincipal();
-		//检查是否更新的是自己的信息
-		if(currentLoginUser.getUserId()!=user.getUserId()) {
-			throw new SystemException(ExceptionEnums.REQUEST_DATA_IS_ILLEGAL);
-		}
-		user.setUpdater(user.getUserId());
-		int row = userServiceImpl.updateById(user);
-		if(row<1){
-			throw new SystemException(ExceptionEnums.DATA_UPDATE_FAIL);
-		}
-		return  JSONResult.success();
-	}
-	
-	@RequestMapping(value="/logout",method = RequestMethod.POST)
-	public JSONResult userLogout(HttpServletRequest request,@RequestBody User user) throws SystemException {
-		Subject subject = SecurityUtils.getSubject();
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+
+    @Autowired
+    UserService userServiceImpl;
+    @Autowired
+    ApiService apiService;
+    @Autowired
+    CollectionService collectionService;
+
+
+    /**
+     * 查用户普通信息
+     *
+     * @param userId
+     * @return
+     * @throws SystemException
+     */
+    @RequestMapping(value = "{userId}/common", method = RequestMethod.GET)
+    public JSONResult queryCommonUserInfoById(@PathVariable Long userId) throws SystemException {
+        User user = userServiceImpl.queryCommonInfo(userId);
+        return new JSONDataResult().add("user", user);
+    }
+
+    /**
+     * 注册
+     *
+     * @param user
+     * @return
+     * @throws SystemException
+     */
+    @RequestMapping(value = "/register", method = RequestMethod.POST)
+    public JSONResult userRegister(User user) throws SystemException {
+
+        userServiceImpl.userRegister(user);
+        return JSONResult.success();
+    }
+
+    /**
+     * 用户个人信息修改
+     *
+     * @param user 用户对象
+     * @return
+     * @throws SystemException
+     */
+    @StaticURL
+    @RequestMapping(value = "/info", method = RequestMethod.PUT)
+    public JSONResult updateOwnInfo(@RequestBody User user) throws SystemException {
+        //TODO 用户在修改完用户信息时，shiro即session中并没有更新
+        logger.info("上传信息：" + user);
+        User currentLoginUser = (User) SecurityUtils.getSubject().getPrincipal();
+        user.setUpdater(currentLoginUser.getUserId());
+        userServiceImpl.update(user);
+        User newUser = userServiceImpl.getOneById(currentLoginUser.getUserId());
+        return new JSONDataResult().add("user", newUser);
+    }
+
+    /**
+     * 用户头像、封面修改
+     *
+     * @param file 图片
+     * @param type 修改的是头像还是背景
+     * @return 新头像的访问URL
+     * @throws SystemException
+     */
+    @StaticURL
+    @RequestMapping(value = "/avatar", method = RequestMethod.PUT)
+    public JSONResult updateOwnAvatarOrFrontCover(@RequestParam("image") MultipartFile file,String type) throws SystemException {
+        User loginUser = (User) SecurityUtils.getSubject().getPrincipal();
+        User user = new User();
+        String relativePath = "";
+        if(Dict.AVATAR.equals(type)){
+            relativePath = apiService.singleImageUploadWithoutWatermark(file, FileSourceEnum.AVATAR);
+            //将session中获用户信息一并更新
+            loginUser.setAvatar(relativePath);
+            user.setAvatar(relativePath);
+        }else if( Dict.FRONTCOVER.equals(type)){
+            relativePath = apiService.saveOriginImage(file, FileSourceEnum.FRONT_COVER);
+            loginUser.setFrontCover(relativePath);
+            user.setFrontCover(relativePath);
+        }
+        user.setUserId(loginUser.getUserId());
+        user.setUpdater(loginUser.getUserId());
+        userServiceImpl.update(user);
+        //TODO 删除用户的上一个头像或封面
+        return new JSONDataResult().add("relativePath", relativePath);
+    }
+
+    /**
+     * 用户执行关注、收藏、喜欢接口
+     *
+     * @param collection
+     * @return
+     */
+    @RequestMapping(value = "/collection", method = RequestMethod.POST)
+    public JSONResult userAddCollection(@RequestBody Collection collection) throws SystemException {
+
+        User currentLoginUser = (User) SecurityUtils.getSubject().getPrincipal();
+        collection.setUserId(currentLoginUser.getUserId());
+        collection.setCollectTime(new Date());
+        collectionService.add(collection);
+
+        return JSONResult.success();
+    }
+
+    /**
+     * 用户删除关注、收藏、喜欢接口
+     *
+     * @param collectionType
+     * @param collectionId
+     * @return
+     */
+    @RequestMapping(value = "/collection", method = RequestMethod.DELETE)
+    public JSONResult userRemoveCollection(@RequestParam CollectionTypeEnum collectionType, @RequestParam String collectionId) throws SystemException {
+        User currentLoginUser = (User) SecurityUtils.getSubject().getPrincipal();
+        //因为该表没有主键，因此使用查询方式删除
+        QueryWrapper<Collection> queryWrapper = new QueryWrapper<>();
+        queryWrapper
+                .eq("user_id", currentLoginUser.getUserId())
+                .eq("collection_type", collectionType)
+                .eq("collection_id", collectionId);
+        collectionService.delete(queryWrapper);
+        return JSONResult.success();
+    }
+
+    public JSONResult modifyOwnPassword() {
+        return JSONResult.success();
+    }
+
+
+    /**
+     * 登出
+     *
+     * @param user
+     * @return
+     * @throws SystemException
+     */
+    @RequestMapping(value = "/logout", method = RequestMethod.POST)
+    public JSONResult userLogout(@RequestBody User user) throws SystemException {
+        Subject subject = SecurityUtils.getSubject();
         //登出
         try {
-			subject.logout();
-		} catch (AuthenticationException e) {
-			logger.info(user.getAccount()+"登出失败！");
-			e.printStackTrace();
-			throw new SystemException(ExceptionEnums.LOGOUT_FAIL);
-		}
-		return JSONResult.success();
-	}
+            subject.logout();
+        } catch (AuthenticationException e) {
+            logger.info(user.getAccount() + "登出失败！");
+            e.printStackTrace();
+            throw new SystemException(ExceptionEnums.LOGOUT_FAIL);
+        }
+        return JSONResult.success();
+    }
 
 }

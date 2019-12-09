@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 
+import com.example.demo.common.FileSourceEnum;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,102 +22,137 @@ import com.example.demo.util.ImageUtil;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.geometry.Positions;
 
+
+/**
+ * @author raining_heavily
+ */
 @Service
 public class ApiServiceImpl implements ApiService {
 
-	private static final Logger logger = LoggerFactory.getLogger(ApiServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(ApiServiceImpl.class);
+    /**
+     * 图片类型gif
+     **/
+    private static final String GIF = "GIF";
 
-	/** 图片文件保存的路径 **/
-	@Value("${image.upload.path}")
-	private String path;
-	@Value("${image.access.url}")
-	private String imageAccessPref;
+    /**
+     * 图片文件原图路径
+     **/
+    @Value("${image.upload.original.path}")
+    private String origPath;
+    /**
+     * 图片文件压缩路径
+     **/
+    @Value("${image.upload.compression.path}")
+    private String compPath;
 
-	@Override
-	public String singleImageUpload(MultipartFile image) throws SystemException {
-		return imageUpload(image,true,"");
-	}
+    @Override
+    public String singleImageUpload(MultipartFile image, FileSourceEnum source) throws SystemException {
+        return imageUpload(image, source, true, "");
+    }
 
-	@Override
-	public String singleImageUpload(MultipartFile file, String waterMark) throws SystemException {
-		return imageUpload(file,true,waterMark);
-	}
+    @Override
+    public String singleImageUpload(MultipartFile file, String waterMark, FileSourceEnum source) throws SystemException {
+        return imageUpload(file, source, true, waterMark);
+    }
 
-	@Override
-	public String singleImageUploadWithoutWatermark(MultipartFile file) throws SystemException {
-		return imageUpload(file,false,null);
-	}
-	
-	private String imageUpload(MultipartFile image,boolean addWatermark, String watermark) throws SystemException {
-		boolean compression = true;
-		if (image == null) {
-			throw new SystemException(ExceptionEnums.IMAGE_FILE_NULL);
-		}
-//		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-		// 年月日生成保存目录
-//		String directory = sdf.format(new Date()) + "/";
-		// uuid文件名
-		String uuid = UUID.randomUUID().toString().replace("-", "");
-		String fileName = image.getOriginalFilename();
-		fileName = uuid + fileName.substring(fileName.lastIndexOf("."));
-		String filePath = "/upload/images/original/" + fileName;
-		logger.info("图片上传路径：" + path + filePath);
-		File imageFile = new File(path + filePath);
-		if (imageFile.getParentFile() != null || !imageFile.getParentFile().isDirectory()) {
-			// 创建文件
-			imageFile.getParentFile().mkdirs();
-		}
-		InputStream inputStream = null;
-		FileOutputStream fileOutputStream = null;
+    @Override
+    public String singleImageUploadWithoutWatermark(MultipartFile file, FileSourceEnum source) throws SystemException {
+        return imageUpload(file, source, false, null);
+    }
 
-		try {
-			inputStream = image.getInputStream();
-			fileOutputStream = new FileOutputStream(imageFile);
-			IOUtils.copyLarge(inputStream, fileOutputStream);
-		} catch (IOException e) {
-			logger.error(ExceptionEnums.FILE_WRITE_FAIL.getMessage());
-			throw new SystemException(ExceptionEnums.IMAGE_FILE_UPLOAD_FAIL);
-		}
+    @Override
+    public String saveOriginImage(MultipartFile file, FileSourceEnum source) throws SystemException {
+        String fileName = getuuid() + ".jpg";
+        saveFileToPath(file, compPath + source.getDynamic() + fileName);
+        return source.getDynamic() + fileName;
+    }
 
-		//double scale = 0.8d;
-		// 压缩图片地址
-		String thumbnailFilePath = "/upload/images/thumbnail/" + fileName;
-		File outFile = new File(path + thumbnailFilePath);
-		logger.info("压缩图片路径"+path + thumbnailFilePath);
-		if(!outFile.exists()) outFile.getParentFile().mkdirs();
-		// 压缩
-		//ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		if (compression) {
-			try {
-				if (addWatermark) {
-					Thumbnails.of(path + filePath)
-//					.size(400, 500)
-//					.outputFormat("jpg")					
-					.watermark(Positions.BOTTOM_LEFT, ImageUtil.waterMarkByText(watermark), 0.8f)
-					.scale(1f)
-					.outputQuality(0.25f)
-					.toFile(outFile);
-				}else {
-					Thumbnails.of(path + filePath)
-//					.size(400, 500)
-//					.outputFormat("jpg")
-					.scale(1f)
-					.outputQuality(0.25f)
-					.toFile(outFile);
-				}
-			} catch (Exception ex) {
-				logger.error(ExceptionEnums.IMAGE_FILE_COMPRESSION_FAIL.getMessage());
-				ex.printStackTrace();
-				throw new SystemException(ExceptionEnums.IMAGE_FILE_UPLOAD_FAIL);
-			}
-		}
-		if(compression||addWatermark){
-			return imageAccessPref + thumbnailFilePath;
-		}else {
-			return imageAccessPref + filePath;
-		}	
+    private String imageUpload(MultipartFile image, FileSourceEnum source, boolean addWatermark, String watermark) throws SystemException {
+        if (image == null) {
+            throw new SystemException(ExceptionEnums.IMAGE_FILE_NULL);
+        }
+        String uuid = getuuid();
+        //获取原文件名
+        String fileName = image.getOriginalFilename();
+        String fileType = fileName.substring(fileName.lastIndexOf(".") + 1).toUpperCase();
+        //直接改为jpg
+        fileName = uuid + ".jpg";
+        //相对路径
+        String relativePath = source.getDynamic() + fileName;
+        // 原图保存路径
+        String filePath = origPath + relativePath;
+        logger.info("图片上传路径：" + filePath);
+        // 压缩图片路径
+        String thumbnailFilePath = compPath + relativePath;
+        logger.info("压缩图片路径：" + thumbnailFilePath);
+        if (GIF.equals(fileType)) {
+            fileName = uuid + ".gif";
+            relativePath = source.getDynamic() + fileName;
+            saveFileToPath(image, compPath + relativePath);
+            return relativePath;
+        } else {
+            saveFileToPath(image, filePath);
+        }
 
-	}
+        File outFile = new File(thumbnailFilePath);
+        if (!outFile.exists()) {
+            outFile.getParentFile().mkdirs();
+        }
+        // 压缩和添加水印
+        try {
+            if (addWatermark) {
+                Thumbnails.of(filePath)
+                        .watermark(Positions.BOTTOM_RIGHT, ImageUtil.waterMarkByText(watermark), 0.8f)
+                        .outputQuality(0.25f)
+                        .scale(1f)
+                        .toFile(outFile);
+            } else {
+                Thumbnails.of(filePath)
+                        .outputQuality(0.25f)
+                        .scale(1f)
+                        .toFile(outFile);
+            }
+        } catch (Exception ex) {
+            logger.error(ExceptionEnums.IMAGE_FILE_COMPRESSION_FAIL.getMessage());
+            ex.printStackTrace();
+            throw new SystemException(ExceptionEnums.IMAGE_FILE_UPLOAD_FAIL);
+        }
+
+        return relativePath;
+    }
+
+    /**
+     * 保存源文件到指定路径
+     *
+     * @param file
+     * @param path
+     * @throws SystemException
+     */
+    private void saveFileToPath(MultipartFile file, String path) throws SystemException {
+        File imageFile = new File(path);
+        if (imageFile.getParentFile() != null || !imageFile.getParentFile().isDirectory()) {
+            // 创建文件
+            imageFile.getParentFile().mkdirs();
+        }
+        InputStream inputStream = null;
+        FileOutputStream fileOutputStream = null;
+
+        try {
+            inputStream = file.getInputStream();
+            fileOutputStream = new FileOutputStream(imageFile);
+            IOUtils.copyLarge(inputStream, fileOutputStream);
+            inputStream.close();
+            fileOutputStream.close();
+        } catch (IOException e) {
+            logger.error(ExceptionEnums.FILE_WRITE_FAIL.getMessage());
+            throw new SystemException(ExceptionEnums.IMAGE_FILE_UPLOAD_FAIL);
+        }
+    }
+
+    private String getuuid(){
+        return UUID.randomUUID().toString().replace("-", "");
+    }
 }
 
 

@@ -96,9 +96,10 @@ public class TestController {
 	        helper.setSubject("【验证码】注册验证码");
 	        Map<String, Object> map = new HashMap<>();
 	        map.put("verificationCode", "12345");
-
-	        Context context = new Context(); //设置参数        
-	        context.setVariables(map);        //emailTemplate为模板文件的文件名，即html demo的文件名        
+			//设置参数
+	        Context context = new Context();
+			//emailTemplate为模板文件的文件名，即html demo的文件名
+	        context.setVariables(map);
 	        String tempContext = templateEngine.process("/email/verification_code", context);
 	      
 	        helper.setText(tempContext, true);

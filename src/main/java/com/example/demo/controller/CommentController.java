@@ -22,8 +22,10 @@ import com.example.demo.entity.User;
 import com.example.demo.exception.SystemException;
 import com.example.demo.service.CommentService;
 
+/**
+ * @author raining_heavily
+ */
 @RestController
-@RequestMapping(value = "/demo/api")
 public class CommentController {
 
 	@Autowired
@@ -34,7 +36,7 @@ public class CommentController {
 		User user = (User) SecurityUtils.getSubject().getPrincipal();
 		comment.setCommentTime(new Date());
 		comment.setUserId(user.getUserId());
-		commentService.add(comment);	
+		commentService.add(comment);
 		return new JSONDataResult().add("commentId", comment.getCommentId());
 	}
 	

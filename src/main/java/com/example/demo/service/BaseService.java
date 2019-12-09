@@ -34,6 +34,14 @@ public interface BaseService<E> {
 	 * @return
 	 */
 	public E getOne(QueryWrapper<E> queryWrapper) throws SystemException;
+
+	/**
+	 * 根据主键获取一条数据
+	 * @param id
+	 * @return
+	 * @throws SystemException
+	 */
+	public E getOneById(long id) throws SystemException;
 	
 	/**
 	 * 获取查询数据总条数
