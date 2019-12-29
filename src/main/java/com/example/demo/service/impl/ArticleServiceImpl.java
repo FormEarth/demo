@@ -64,7 +64,7 @@ public class ArticleServiceImpl extends BaseServiceImpl<Article> implements Arti
                 throw new SystemException(ExceptionEnums.FILE_WRITE_FAIL);
             }
             //调用shell使hexo重新生成静态页面
-            Util.shellExecute(blogPath,"cmd","/c","hexo generate");
+            Util.shellExecute(blogPath,"sh","/c","hexo generate");
         }
     }
 
