@@ -10,7 +10,6 @@ import com.example.demo.service.ApiService;
 import com.example.demo.service.TagService;
 import com.example.demo.service.UserService;
 import com.example.demo.util.Util;
-
 import com.mongodb.client.result.UpdateResult;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.util.Assert;
@@ -26,10 +25,10 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -41,6 +40,7 @@ import java.util.List;
  **/
 @RestController
 public class AtlasController {
+
     private final static Logger logger = LoggerFactory.getLogger(AtlasController.class);
     /**
      * 分页大小
@@ -58,7 +58,7 @@ public class AtlasController {
     private String accessPref;
 
     /**
-     * 创建图集接口
+     * 创建图集
      *
      * @param files
      * @param atlas
@@ -67,23 +67,23 @@ public class AtlasController {
      */
     @RequestMapping(value = "/atlas", method = RequestMethod.POST)
     public JSONResult createOneAtlas(@RequestParam("images") MultipartFile[] files, Atlas atlas) throws SystemException {
-        List<String> urlList = new ArrayList<>();
+        List<String> imageList = new ArrayList<>();
         if (null != files && files.length > 0) {
             //多图片处理
             for (MultipartFile file : files) {
-                String url = apiService.singleImageUpload(file, Dict.GLOBAL_WATERMARK, FileSourceEnum.ATLAS);
-                urlList.add(url);
+                String relativePath = apiService.singleImageUpload(file, Dict.GLOBAL_WATERMARK, FileSourceEnum.ATLAS);
+                imageList.add(relativePath);
             }
         }
-        logger.info("图片数量:" + files.length + ",图片相对路径：" + urlList);
+        logger.info("图片数量:" + files.length + ",图片相对路径：" + imageList);
         Date nowDate = new Date();
-        atlas.setAtlasPictures(urlList);
+        atlas.setAtlasPictures(imageList);
         atlas.setIdentical(Util.checkImagesProportion(files));
         User currentLoginUser = (User) SecurityUtils.getSubject().getPrincipal();
         //处理标签，新建或者更新
         List<Tag> tagList = atlas.getAtlasTags();
         if (tagList != null) {
-            tagService.handleTagList(tagList);
+            tagService.handleTagList(tagList,true);
         } else {
             //空时添加空list
             atlas.setAtlasTags(new ArrayList<>());
@@ -160,6 +160,7 @@ public class AtlasController {
      * @param lastRefreshTime
      * @return
      * @throws SystemException
+     * @deprecated
      */
     @StaticURL
     @RequestMapping(value = "/atlases/refresh/{lastRefreshTime}", method = RequestMethod.GET)
@@ -198,6 +199,7 @@ public class AtlasController {
     @StaticURL
     @RequestMapping(value = "/atlas/{atlasId}", method = RequestMethod.GET)
     public JSONResult queryAtlasDetailById(@PathVariable String atlasId) throws SystemException {
+
         Atlas atlas = mongoTemplate.findById(atlasId, Atlas.class);
         if (atlas == null) {
             throw new SystemException(ExceptionEnums.SELECT_DATA_IS_EMPTY);
@@ -240,8 +242,8 @@ public class AtlasController {
     }
 
     /**
-     * 图集修改接口<br>
-     * 暂时只允许修改文字内容和标签
+     * 图集修改<br>
+     * 不允许图片修改
      *
      * @param
      * @return
@@ -249,11 +251,10 @@ public class AtlasController {
      */
     @RequestMapping(value = "/atlas", method = RequestMethod.PUT)
     public JSONResult modifyAtlas(@RequestBody Atlas atlas) throws SystemException {
-        System.out.println("-----:"+atlas);
         User currentLoginUser = (User) SecurityUtils.getSubject().getPrincipal();
         if(atlas.getAtlasTags()!=null){
-            //TODO 不应该再把标签热度+1
-            tagService.handleTagList(atlas.getAtlasTags());
+            //TODO 不应该再把标签热度+1，tip：是否只
+            tagService.handleTagList(atlas.getAtlasTags(),false);
         }
         Query query = new Query().addCriteria(Criteria.where("_id").is(atlas.getAtlasId())).addCriteria(Criteria.where("creater").is(currentLoginUser.getUserId()));
         //向数组末尾增加元素

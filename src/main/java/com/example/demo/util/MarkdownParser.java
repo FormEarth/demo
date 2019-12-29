@@ -9,6 +9,7 @@ import com.vladsch.flexmark.util.data.DataHolder;
 import org.springframework.util.StringUtils;
 
 /**
+ * Markdown转换
  * @author raining_heavily
  * @date 2019/12/2 12:11
  **/
@@ -32,10 +33,9 @@ public class MarkdownParser {
         String text = textCollectingVisitor.collectAndGetText(document);
         text = text.replaceAll("\n", " ");
         if (index > 0) {
-            index = (index > text.length()) ? text.length() :index ;
+            index = (index > text.length()) ? text.length() : index;
             text = text.substring(0, index);
         }
-        System.out.println("-----------------:"+text);
         return text;
     }
 }

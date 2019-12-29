@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * 图集对象
+ * 图集
  * @author raining_heavily
  * @date 2019/11/3 22:19
  **/

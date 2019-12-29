@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.mapper.ArticleMapper">
+
+    <resultMap id="articleResultMap" type="com.example.demo.entity.Article">
+        <!-- 这里的属性必须全部映射，否则无法映射到对应的类上-->
+        <result property="articleId" column="article_id"/>
+        <result property="author" column="author"/>
+        <result property="authorName" column="author_name"/>
+        <result property="title" column="title"/>
+        <result property="frontCover" column="front_cover"/>
+        <result property="summary" column="summary"/>
+        <result property="content" column="content"/>
+        <result property="codeStyle" column="code_style"/>
+        <result property="personal" column="personal"/>
+        <result property="anonymous" column="anonymous"/>
+        <result property="comment" column="comment"/>
+        <result property="sendTime" column="send_time"/>
+        <result property="status" column="status"/>
+        <result property="readerNum" column="reader_num"/>
+        <result property="approval" column="approval"/>
+        <result property="oppose" column="oppose"/>
+        <result property="creater" column="creater"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updater" column="updater"/>
+        <result property="updateTime" column="update_time"/>
+        <collection property="tags" ofType="com.example.demo.entity.Tag">
+            <result property="tagId" column="tag_id"/>
+            <result property="tagText" column="tag_text"/>
+        </collection>
+    </resultMap>
+
+    <!-- 首页文章列表（分页） -->
+    <select id="queryArticlesWithPage" parameterType="long" resultMap="articleResultMap">
+        -- 子查询里的order by 会在连接查询后丢失
+        select a.*,t.tag_id,t.tag_text from
+        (
+        select * from article where personal=0 and `status`=1 order by send_time desc limit #{currentPage},7
+        ) a
+        left join demo_article_tag ta on a.article_id = ta.article_id
+        left join demo_tag t on ta.tag_id = t.tag_id order by a.send_time desc;;
+    </select>
+
+    <!-- 根据文章Id内容 -->
+    <select id="queryArticleDetailById" parameterType="long" resultMap="articleResultMap">
+        select a.*,t.tag_id,t.tag_text from
+        (
+        select * from article where personal=0 and `status`=1 and article_id = #{articleId}
+        ) a
+        left join demo_article_tag ta on a.article_id = ta.article_id
+        left join demo_tag t on ta.tag_id = t.tag_id;
+    </select>
+
+</mapper>

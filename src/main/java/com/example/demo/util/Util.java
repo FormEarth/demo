@@ -1,30 +1,34 @@
 package com.example.demo.util;
 
+import com.example.demo.common.Dict;
+import com.example.demo.entity.User;
+import com.example.demo.exception.ExceptionEnums;
+import com.example.demo.exception.SystemException;
+import org.apache.shiro.crypto.hash.Md5Hash;
+import org.apache.shiro.crypto.hash.SimpleHash;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.DigestUtils;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.text.SimpleDateFormat;
-import java.util.*;
-
-import com.example.demo.common.FileSourceEnum;
-import org.apache.shiro.crypto.hash.Md5Hash;
-import org.apache.shiro.crypto.hash.SimpleHash;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.util.DigestUtils;
-
-import com.example.demo.common.Dict;
-import com.example.demo.entity.User;
-import com.example.demo.exception.ExceptionEnums;
-import com.example.demo.exception.SystemException;
-import com.example.demo.service.UserService;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.imageio.ImageIO;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 /**
  * 公共方法类
@@ -35,13 +39,7 @@ import javax.imageio.ImageIO;
  */
 public class Util {
 
-    /**
-     * 图片访问的路径前缀 @Value 无法给static进行赋值
-     **/
-    @Value("${image.access.url}")
-    public String imageAccessPref;
-    @Autowired
-    UserService userService;
+    private static final Logger logger = LoggerFactory.getLogger(Util.class);
 
     /**
      * MD5加密
@@ -55,21 +53,24 @@ public class Util {
     }
 
     /**
-     * 获取系统时间
+     * 获取当前时间字符串
      *
      * @return
      */
     public static String getSystemTime() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return sdf.format(new Date());
+        LocalDateTime current = LocalDateTime.now();
+        return current.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 
+    public static String getRemoteIpAddress(HttpServletRequest request){
+        return null;
+    }
     /**
      * 获取本地真实IP地址
      *
      * @throws SocketException
      */
-    public static String getRealIP() throws SocketException {
+    public static String getLocalRealIP() throws SocketException {
 
         Enumeration<NetworkInterface> IFaces = NetworkInterface.getNetworkInterfaces();
         while (IFaces.hasMoreElements()) {
@@ -107,28 +108,26 @@ public class Util {
         return true;
     }
 
-    public static void shiroPasswordWithSalt() {
-        // 所需加密的参数 即 密码
-        String source = "123456";
-        // [盐] 一般为用户名 或 随机数
-        String salt = "Shiro";
-        // 加密次数
+    /**
+     * 生成shiro加密密码
+     * @param source 所需加密的参数 即 密码
+     * @param salt   [盐] 一般为用户名 或 随机数
+     * @return
+     */
+    public static String shiroPasswordWithSalt(String source, String salt) {
         int hashIterations = 3;
-
         // 调用 org.apache.shiro.crypto.hash.Md5Hash.Md5Hash(Object source, Object salt,
         // int hashIterations)构造方法实现MD5盐值加密
         Md5Hash mh = new Md5Hash(source, salt, hashIterations);
-        // 打印最终结果
-        System.out.println(mh.toString());
 
         /*
          * 调用org.apache.shiro.crypto.hash.SimpleHash.SimpleHash(String algorithmName,
          * Object source, Object salt, int hashIterations) 构造方法实现盐值加密 String
          * algorithmName 为加密算法 支持md5 base64 等
          */
-        SimpleHash sh = new SimpleHash("md5", source, salt, hashIterations);
-        // 打印最终结果
-        System.out.println(sh.toString());
+//        SimpleHash sh = new SimpleHash("md5", source, salt, hashIterations);
+        // 最终结果
+        return mh.toString();
 
     }
 
@@ -180,7 +179,110 @@ public class Util {
         return String.valueOf(Math.random()).substring(2, 2 + index);
     }
 
-    public static void main(String[] args) throws CloneNotSupportedException {
+    /**
+     * 在指定路径上执行shell命令
+     *
+     * @param path     路径，eg. C:/Users/chunyangwang/Desktop
+     * @param commands 命令（多条）， eg.<br>
+     *                 windows: "cmd", "/c", "hexo generate"<br>
+     *                 Linux: "sh", "/c", "hexo generate"
+     * @return
+     * @throws SystemException
+     */
+    public static boolean shellExecute(String path, String... commands) throws SystemException {
+        ProcessBuilder processBuilder = new ProcessBuilder(commands);
+        //使用cd无法切换目录，指定命令执行路径
+        File file = new File(path);
+        processBuilder.directory(file);
+        Process p;
+        try {
+            p = processBuilder.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.error("execute command " + Arrays.asList(commands) + "failed!");
+            throw new SystemException(ExceptionEnums.COMMAND_EXECUTE_FAILED);
+        }
+        InputStream in = p.getInputStream();
+        // windows默认编码格式为GBK
+        BufferedReader bs = null;
+        try {
+            bs = new BufferedReader(new InputStreamReader(in, "utf-8"));
+        } catch (UnsupportedEncodingException e) {
+            logger.error("this error will never appear!");
+        }
+//        BufferedReader bs = new BufferedReader(new InputStreamReader(in));
+        //阻塞一直到命令执行完毕
+        try {
+            //TODO 指定阻塞时间，不然会一直在这
+            p.waitFor(2, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            logger.error("waitFor fail!");
+            throw new SystemException(ExceptionEnums.COMMAND_EXECUTE_FAILED);
+        }
+        StringBuffer buffer = new StringBuffer();
+        try {
+            while (bs.read() > 0) {
+                buffer.append(bs.readLine()).append("\n");
+                System.out.println(bs.readLine());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.error("read result failed!");
+            throw new SystemException(ExceptionEnums.COMMAND_EXECUTE_FAILED);
+        }
+        logger.error(buffer.toString());
+        System.out.println(buffer.toString());
+        //命令执行失败
+        if (p.exitValue() != 0) {
+            logger.error("command execute failed!");
+            throw new SystemException(ExceptionEnums.COMMAND_EXECUTE_FAILED);
+        }
+        return true;
+    }
+
+    /**
+     * 将首字母大写
+     *
+     * @param str
+     * @return
+     */
+    public static String firstUpperCase(String str) {
+        String upperChar = str.substring(0, 1).toUpperCase();
+        String left = str.substring(1);
+        return upperChar + left;
+    }
+
+    //下划线转驼峰命名
+    public static String _toCamelCase(String _str) throws SystemException {
+        if (!_str.contains("_")) {
+            return _str;
+        }
+        String[] strings = _str.split("_");
+        StringBuffer sb = new StringBuffer();
+        for (int i = 1; i < strings.length; i++) {
+            strings[i] = firstUpperCase(strings[i]);
+        }
+        Stream.of(strings).forEach(x -> sb.append(x));
+        return sb.toString();
+    }
+
+    public static void readFormFile() throws IOException, SystemException {
+        String path = "C:\\Users\\chunyangwang\\Desktop\\aaa.txt";
+        String handleStr = "<result property=\"${0}\" column=\"${1}\"/>";
+        BufferedReader bufferedReader = new BufferedReader(new FileReader(path));
+        String line;
+//        while (bufferedReader.read()>0)//此种情况会出现第一个字母丢失的问题
+        while ((line = bufferedReader.readLine()) != null) {
+//            String str = bufferedReader.readLine();
+            String caseStr = _toCamelCase(line);
+            System.out.println(handleStr.replace("${0}", caseStr).replace("${1}", line));
+//            System.out.println(str);
+        }
+
+    }
+
+    public static void main(String[] args) throws CloneNotSupportedException, SystemException, IOException {
 //		System.out.println();
 //		BigDecimal a = new BigDecimal(5.567);
 //		BigDecimal b = new BigDecimal(2.000);
@@ -193,17 +295,23 @@ public class Util {
 //        System.out.println(list);
 //        String str = "hello";
 //        System.out.println(Arrays.asList(str));
-        User user = new User();
-        user.setUserName("11111");
-        System.out.println(user);
-        User user1 = (User) user.clone();
-        user1.setUserName("22222");
-        System.out.println(user);
-        User user2 = user;
-        user2.setUserName("33333");
-        System.out.println(user);
+//        User user = new User();
+//        user.setUserName("11111");
+//        System.out.println(user);
+//        User user1 = (User) user.clone();
+//        user1.setUserName("22222");
+//        System.out.println(user);
+//        User user2 = user;
+//        user2.setUserName("33333");
+//        System.out.println(user);
+//        shellExecute("cd C:\\Users\\chunyangwang\\Desktop","hexo generate");
+//        boolean b = shellExecute("C:/Users/chunyangwang/Desktop", "cmd", "/c", "mkdir qwert");
 
-
+//        Long l = Long.valueOf("-1");
+//        System.out.println(l.compareTo(-1L));
+//        System.out.println(l.equals(-1));
+//        shellExecute("D:/gitbox/hexo-blog/","cmd","/c","hexo generate");
+        readFormFile();
     }
 
 }

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import com.baomidou.mybatisplus.core.toolkit.SerializationUtils;
+import com.example.demo.util.Util;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterThrowing;
@@ -115,7 +116,7 @@ public class StaticURLAspect {
                     // 设置操作权限为true
                     field.setAccessible(true);
                     //TODO 自定义实体嵌套自定义实体，递归
-                    String name = this.firstUpperCase(field.getName());
+                    String name = Util.firstUpperCase(field.getName());
                     try {
                         Method getMethod = clazz.getMethod("get" + name);
                         // 获取到该属性的值
@@ -145,18 +146,6 @@ public class StaticURLAspect {
             }
         }
         return object;
-    }
-
-    /**
-     * 将首字母大写
-     *
-     * @param str
-     * @return
-     */
-    public String firstUpperCase(String str) {
-        String upperChar = str.substring(0, 1).toUpperCase();
-        String remanentChar = str.substring(1);
-        return upperChar + remanentChar;
     }
 
 //	@Before("cut()")

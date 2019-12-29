@@ -76,12 +76,13 @@ public class LoginController {
         }
         User currentUser = (User) SecurityUtils.getSubject().getPrincipal();
         JSONDataResult result = new JSONDataResult();
-        //清除密码信息
-        currentUser.setPassword(null);
-        currentUser.setSalt(null);
+        User resultUser = currentUser.clone();
+        //置空密码信息
+        resultUser.setPassword(null);
+        resultUser.setSalt(null);
         //初始化用户关注、喜欢、收藏列表
         initCollectionList(currentUser.getUserId(), result);
-        return result.add(Dict.CURRENT_USER_DATA, currentUser.clone())
+        return result.add(Dict.CURRENT_USER_DATA, resultUser)
                 .add("AuthorizationSessionId", subject.getSession().getId());
 
     }
@@ -106,8 +107,11 @@ public class LoginController {
                 user = (User) SecurityUtils.getSubject().getPrincipal();
             }
         }
-        System.out.println("已登录用户："+user);
-        JSONDataResult result = new JSONDataResult().add(Dict.CURRENT_USER_DATA, user.clone());
+        User resultUser = user.clone();
+        //置空密码信息
+        resultUser.setPassword(null);
+        resultUser.setSalt(null);
+        JSONDataResult result = new JSONDataResult().add(Dict.CURRENT_USER_DATA, resultUser);
         initCollectionList(user.getUserId(), result);
         return result;
     }

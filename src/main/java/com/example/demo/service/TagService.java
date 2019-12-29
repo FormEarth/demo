@@ -32,6 +32,7 @@ public interface TagService extends BaseService<Tag> {
     /**
      * 批量处理Tag，没有则新增，有则热度+1
      * @param tags
+     * @param create 是否是新增，若是新增，已有标签热度+1；不是新增忽略已有标签
      */
-    public void handleTagList(List<Tag> tags);
+    public void handleTagList(List<Tag> tags,boolean create);
 }

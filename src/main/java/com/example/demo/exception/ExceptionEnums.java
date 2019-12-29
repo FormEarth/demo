@@ -57,6 +57,10 @@ public enum ExceptionEnums {
 	FILED_VALIDATOR_ERROR("1111","数据验证失败"),
 	/** 在唯一索引行内插入重复数据 */
 	SQL_DUPLICATE_ENTRY("1112","数据已存在"),
+	/** 执行系统命令时失败 */
+	COMMAND_EXECUTE_FAILED("1113","命令执行失败"),
+	/** 新密码与旧密码相同 */
+	SAME_PASSWORD_ERROR("1114","新旧密码相同"),
 	/** 默认的成功 */
 	DEFAULT_SUCCESS("2000","请求成功"),
 	/** 服务器异常 */

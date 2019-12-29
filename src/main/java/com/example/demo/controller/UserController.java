@@ -14,6 +14,7 @@ import com.example.demo.exception.SystemException;
 import com.example.demo.service.ApiService;
 import com.example.demo.service.CollectionService;
 import com.example.demo.service.UserService;
+import com.example.demo.util.Util;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.subject.Subject;
@@ -23,7 +24,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * @author raniing_heavily
@@ -98,16 +101,16 @@ public class UserController {
      */
     @StaticURL
     @RequestMapping(value = "/avatar", method = RequestMethod.PUT)
-    public JSONResult updateOwnAvatarOrFrontCover(@RequestParam("image") MultipartFile file,String type) throws SystemException {
+    public JSONResult updateOwnAvatarOrFrontCover(@RequestParam("image") MultipartFile file, String type) throws SystemException {
         User loginUser = (User) SecurityUtils.getSubject().getPrincipal();
         User user = new User();
         String relativePath = "";
-        if(Dict.AVATAR.equals(type)){
+        if (Dict.AVATAR.equals(type)) {
             relativePath = apiService.singleImageUploadWithoutWatermark(file, FileSourceEnum.AVATAR);
             //将session中获用户信息一并更新
             loginUser.setAvatar(relativePath);
             user.setAvatar(relativePath);
-        }else if( Dict.FRONTCOVER.equals(type)){
+        } else if (Dict.FRONTCOVER.equals(type)) {
             relativePath = apiService.saveOriginImage(file, FileSourceEnum.FRONT_COVER);
             loginUser.setFrontCover(relativePath);
             user.setFrontCover(relativePath);
@@ -156,7 +159,37 @@ public class UserController {
         return JSONResult.success();
     }
 
-    public JSONResult modifyOwnPassword() {
+    /**
+     * 密码修改
+     * @param map 因为就两个参数，这里映射为map
+     * @return
+     * @throws SystemException
+     */
+    @RequestMapping(value = "/password", method = RequestMethod.PUT)
+    public JSONResult modifyOwnPassword(@RequestBody Map<String,String> map) throws SystemException {
+        String newPassword = map.get("newPassword");
+        String oldPassword = map.get("oldPassword");
+        logger.info("new:{},old:{}",newPassword,oldPassword);
+        if (newPassword.equals(oldPassword)) {
+            throw new SystemException(ExceptionEnums.SAME_PASSWORD_ERROR);
+        }
+        User currentLoginUser = (User) SecurityUtils.getSubject().getPrincipal();
+        String password = Util.shiroPasswordWithSalt(oldPassword, currentLoginUser.getSalt());
+        //密码匹配
+        if (currentLoginUser.getPassword().equals(password)) {
+            String timestamp = String.valueOf(System.currentTimeMillis());
+            User user = new User();
+            user.setUserId(currentLoginUser.getUserId());
+            user.setSalt(timestamp);
+            String encodePassword = Util.shiroPasswordWithSalt(newPassword, timestamp);
+            user.setPassword(encodePassword);
+            userServiceImpl.updateById(user);
+            //更新session中的用户信息
+            currentLoginUser.setPassword(encodePassword);
+            currentLoginUser.setSalt(timestamp);
+        } else {
+            throw new SystemException(ExceptionEnums.PASSWORD_ERROR);
+        }
         return JSONResult.success();
     }
 
@@ -168,7 +201,7 @@ public class UserController {
      * @return
      * @throws SystemException
      */
-    @RequestMapping(value = "/logout", method = RequestMethod.POST)
+    @PostMapping(value = "/logout")
     public JSONResult userLogout(@RequestBody User user) throws SystemException {
         Subject subject = SecurityUtils.getSubject();
         //登出

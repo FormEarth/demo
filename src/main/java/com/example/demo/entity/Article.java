@@ -1,8 +1,10 @@
 package com.example.demo.entity;
 
 import java.util.Date;
+import java.util.List;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.example.demo.aop.annotation.StaticURL;
@@ -51,7 +53,8 @@ public class Article {
     /**
      * 文章标签
      **/
-    private String tags;
+    @TableField(exist = false)
+    private List<Tag> tags;
     /**
      * 代码样式
      **/
@@ -68,6 +71,11 @@ public class Article {
      * 允许评论
      **/
     private Boolean comment;
+    /**
+     * 是否生成文件
+     **/
+    @TableField(exist = false)
+    private Boolean saveToFile;
     /**
      * 发布时间
      **/
@@ -108,12 +116,30 @@ public class Article {
 
     @Override
     public String toString() {
-        return "Article [articleId=" + articleId + ", authorName=" + authorName + ", author=" + author + ", title=" + title
-                + ", frontCover=" + frontCover + ", summary=" + summary + ", content=" + content + ", tags=" + tags
-                + ", codeStyle=" + codeStyle + ", personal=" + personal + ", anonymous=" + anonymous + ", comment="
-                + comment + ", sendTime=" + sendTime + ", status=" + status + ", readerNum=" + readerNum + ", approval="
-                + approval + ", oppose=" + oppose + ", creater=" + creater + ", createTime=" + createTime + ", updater="
-                + updater + ", updateTime=" + updateTime + "]";
+        return "Article{" +
+                "articleId=" + articleId +
+                ", authorName='" + authorName + '\'' +
+                ", author=" + author +
+                ", title='" + title + '\'' +
+                ", frontCover='" + frontCover + '\'' +
+                ", summary='" + summary + '\'' +
+                ", content='" + content + '\'' +
+                ", tags=" + tags +
+                ", codeStyle='" + codeStyle + '\'' +
+                ", personal=" + personal +
+                ", anonymous=" + anonymous +
+                ", comment=" + comment +
+                ", saveToFile=" + saveToFile +
+                ", sendTime=" + sendTime +
+                ", status=" + status +
+                ", readerNum=" + readerNum +
+                ", approval=" + approval +
+                ", oppose=" + oppose +
+                ", creater=" + creater +
+                ", createTime=" + createTime +
+                ", updater=" + updater +
+                ", updateTime=" + updateTime +
+                '}';
     }
 
     /**
@@ -167,11 +193,11 @@ public class Article {
         this.content = content;
     }
 
-    public String getTags() {
+    public List<Tag> getTags() {
         return tags;
     }
 
-    public void setTags(String tags) {
+    public void setTags(List<Tag> tags) {
         this.tags = tags;
     }
 
@@ -296,4 +322,11 @@ public class Article {
         this.authorName = authorName;
     }
 
+    public Boolean getSaveToFile() {
+        return saveToFile;
+    }
+
+    public void setSaveToFile(Boolean saveToFile) {
+        this.saveToFile = saveToFile;
+    }
 }

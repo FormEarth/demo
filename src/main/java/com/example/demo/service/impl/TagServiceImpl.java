@@ -33,7 +33,7 @@ public class TagServiceImpl extends BaseServiceImpl<Tag> implements TagService {
         queryWrapper.eq("tag_status", Dict.TAG_STATUS_NORMAL);
         List<Tag> tagList;
         tagList = super.baseMapper.selectList(queryWrapper);
-        if(tagList.size()<1){
+        if (tagList.size() < 1) {
             throw new SystemException(ExceptionEnums.DATA_SELECT_FAIL);
         }
         return tagList;
@@ -53,7 +53,7 @@ public class TagServiceImpl extends BaseServiceImpl<Tag> implements TagService {
     @Override
     public int updateTagHotById(long tagId) throws SystemException {
         int count = tagMapper.updateTagHotById(tagId);
-        if(count!=1){
+        if (count != 1) {
             throw new SystemException(ExceptionEnums.DATA_UPDATE_FAIL);
         }
         return 1;
@@ -66,10 +66,11 @@ public class TagServiceImpl extends BaseServiceImpl<Tag> implements TagService {
      */
     @Transactional
     @Override
-    public void handleTagList(List<Tag> tags) {
+    public void handleTagList(List<Tag> tags, boolean create) {
         User currentLoginUser = (User) SecurityUtils.getSubject().getPrincipal();
+        if (tags == null || tags.size() < 1) return;
         for (Tag temp : tags) {
-            if (-1 == temp.getTagId()) {
+            if (temp.getTagId().compareTo(-1L) == 0) {
                 //插入
                 Tag tempTag = new Tag();
                 tempTag.setTagText(temp.getTagText());
@@ -80,7 +81,7 @@ public class TagServiceImpl extends BaseServiceImpl<Tag> implements TagService {
                 temp.setTagId(tempTag.getTagId());
             } else {
                 //更新
-                tagMapper.updateTagHotById(temp.getTagId());
+                if (create) tagMapper.updateTagHotById(temp.getTagId());
             }
         }
     }
