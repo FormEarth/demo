@@ -122,7 +122,6 @@ public class TestController {
 		
 		List<Permission> list = new ArrayList<>();
 		list =	permissionService.getPermissionsByAccount(account);
-		System.out.println("+++++++"+list.size());
 		list.stream().forEach(System.out::print);
 		return new JSONDataResult().add("permissions", list);
 	}

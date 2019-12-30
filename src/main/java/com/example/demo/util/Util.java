@@ -224,7 +224,6 @@ public class Util {
         try {
             while (bs.read() > 0) {
                 buffer.append(bs.readLine()).append("\n");
-                System.out.println(bs.readLine());
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -232,10 +231,9 @@ public class Util {
             throw new SystemException(ExceptionEnums.COMMAND_EXECUTE_FAILED);
         }
         logger.error(buffer.toString());
-        System.out.println(buffer.toString());
         //命令执行失败
         if (p.exitValue() != 0) {
-            logger.error("command execute failed!");
+            logger.error("command execute failed!path is {},commands is{}",path,Arrays.asList(commands));
             throw new SystemException(ExceptionEnums.COMMAND_EXECUTE_FAILED);
         }
         return true;

@@ -77,8 +77,6 @@ public class ImageUtil {
 		// 获取真实宽度
 		float realWidth = getRealFontWidth(text);
 		float fontSize = font.getSize();
-		System.out.println("----------------"+realWidth+","+fontSize);
-		System.out.println("----------------y:"+(width-realWidth));
 		// 计算绘图偏移x、y，使得使得水印文字在图片中居中
 		// 这里需要理解x、y坐标是基于Graphics2D.rotate过后的坐标系
 //		float x = 0.5f * width - 0.5f * fontSize * realWidth;

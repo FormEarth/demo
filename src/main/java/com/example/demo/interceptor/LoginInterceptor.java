@@ -4,8 +4,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.example.demo.common.Dict;
+import com.example.demo.controller.ArticleController;
 import com.example.demo.entity.User;
 import org.apache.shiro.SecurityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -21,16 +24,18 @@ import com.example.demo.exception.SystemException;
 @Component
 public class LoginInterceptor implements HandlerInterceptor {
 
+    private static final Logger logger = LoggerFactory.getLogger(LoginInterceptor.class);
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
-        System.out.println("执行了拦截preHandle," + request.getRequestURI());
+        logger.info("执行了拦截preHandle,{}" ,request.getRequestURI());
         //GET方法的请求不校验是否登录
         if (Dict.GET.equals(request.getMethod())) {
             return true;
         }
         User currentLoginUser = (User) SecurityUtils.getSubject().getPrincipal();
-        System.out.println("当前用户：" + currentLoginUser);
+        logger.info("当前用户：{}" , currentLoginUser);
         if (currentLoginUser == null) {
             throw new SystemException(ExceptionEnums.USER_NOT_LOGIN);
         } else {
@@ -42,13 +47,13 @@ public class LoginInterceptor implements HandlerInterceptor {
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
             throws Exception {
-        System.out.println("执行了afterCompletion");
+        logger.info("执行了afterCompletion");
     }
 
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
                            ModelAndView modelAndView) throws Exception {
-        System.out.println("执行了拦截afterCompletion");
+        logger.info("执行了拦截afterCompletion");
     }
 
 
