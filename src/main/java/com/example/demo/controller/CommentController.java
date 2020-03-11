@@ -31,15 +31,29 @@ public class CommentController {
 	@Autowired
 	CommentService commentService;
 
+	/**
+	 * 新增评论
+	 * @param comment
+	 * @return
+	 * @throws SystemException
+	 */
 	@RequestMapping(value = { "/comment" }, method = RequestMethod.POST)
 	public JSONResult addComment(@RequestBody Comment comment) throws SystemException {
 		User user = (User) SecurityUtils.getSubject().getPrincipal();
+		int index = commentService.total(new QueryWrapper<Comment>().eq("article_id", comment.getArticleId()));
+		comment.setCommentIndex(index + 1);
 		comment.setCommentTime(new Date());
 		comment.setUserId(user.getUserId());
 		commentService.add(comment);
 		return new JSONDataResult().add("commentId", comment.getCommentId());
 	}
 	
+	/** 
+	 * 删除评论 //TODO 是否改物理删除为逻辑删除
+	 * @param commentId
+	 * @return
+	 * @throws SystemException
+	 */
 	@RequestMapping(value = { "/comment" }, method = RequestMethod.DELETE)
 	public JSONResult deleteComment(long commentId) throws SystemException {
 		commentService.delete(new QueryWrapper<Comment>().eq("comment_id", commentId));
@@ -60,15 +74,30 @@ public class CommentController {
 		return new JSONDataResult().add("replies",replies );
 	}
 	
+	/**
+	 * 新增回复
+	 * @param reply
+	 * @return
+	 * @throws SystemException
+	 */
 	@RequestMapping(value = { "/reply" }, method = RequestMethod.POST)
-	public JSONResult addOneReply(@RequestBody Reply reply) throws SystemException {
+	public JSONResult addReply(@RequestBody Reply reply) throws SystemException {
+		User user = (User) SecurityUtils.getSubject().getPrincipal();
+		reply.setReplyFromUserId(user.getUserId());
+		reply.setReplyFromUserName(user.getUserName());
 		reply.setReplyTime(new Date());
 		commentService.addOneReply(reply);
 		return new JSONDataResult().add("replyId", reply.getReplyId());
 	}
 	
+	/**
+	 * 删除回复
+	 * @param replyId
+	 * @return
+	 * @throws SystemException
+	 */
 	@RequestMapping(value = { "/reply" }, method = RequestMethod.DELETE)
-	public JSONResult deleteOneReply(long replyId) throws SystemException {
+	public JSONResult deleteReplyById(long replyId) throws SystemException {
 		commentService.deleteOneReply(replyId);
 		return JSONResult.success();
 	}

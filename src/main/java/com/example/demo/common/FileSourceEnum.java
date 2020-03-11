@@ -6,13 +6,13 @@ package com.example.demo.common;
  * @date 2019/11/14 12:47
  **/
 public enum FileSourceEnum {
-    //文章
+    /** 文章 **/
     ARTICLE("/article/"),
-    //图集
+    /** 图集 **/
     ATLAS("/atlas/"),
-    //头像
+    /** 头像 **/
     AVATAR("/avatar/"),
-    //用户背景图
+    /** 用户背景图 **/
     FRONT_COVER("/front_cover/");
 
     private String dynamic;

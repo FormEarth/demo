@@ -9,7 +9,7 @@ import org.springframework.web.filter.CorsFilter;
 
 /**
  * 全局的跨域配置
- * spring的@ConditionalOnProperty注解用来根据配置文件的属性条件化添加配置，value:配置文件里的属性名;
+ * spring的@ConditionalOnProperty注解用来根据配置文件的属性条件化添加配置
  * havingValue:当值为true时会被加载;matchIfMissing:属性缺失时的值为false
  *
  * @author raining_heavily

@@ -22,53 +22,53 @@ import com.example.demo.util.ImageUtil;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.geometry.Positions;
 
-
 /**
  * @author raining_heavily
  */
 @Service
 public class ApiServiceImpl implements ApiService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ApiServiceImpl.class);
-    /**
-     * 图片类型gif
-     **/
-    private static final String GIF = "GIF";
+	private static final Logger logger = LoggerFactory.getLogger(ApiServiceImpl.class);
+	/**
+	 * 图片类型gif
+	 **/
+	private static final String GIF = "GIF";
 
-    /**
-     * 图片文件原图路径
-     **/
-    @Value("${image.upload.original.path}")
-    private String origPath;
-    /**
-     * 图片文件压缩路径
-     **/
-    @Value("${image.upload.compression.path}")
-    private String compPath;
+	/**
+	 * 图片文件原图路径
+	 **/
+	@Value("${image.upload.original.path}")
+	private String origPath;
+	/**
+	 * 图片文件压缩路径
+	 **/
+	@Value("${image.upload.compression.path}")
+	private String compPath;
 
-    @Override
-    public String singleImageUpload(MultipartFile image, FileSourceEnum source) throws SystemException {
-        return imageUpload(image, source, true, "");
-    }
+	@Override
+	public String singleImageUpload(MultipartFile image, FileSourceEnum source) throws SystemException {
+		return imageUpload(image, source, true, "");
+	}
 
-    @Override
-    public String singleImageUpload(MultipartFile file, String waterMark, FileSourceEnum source) throws SystemException {
-        return imageUpload(file, source, true, waterMark);
-    }
+	@Override
+	public String singleImageUpload(MultipartFile file, String waterMark, FileSourceEnum source)
+			throws SystemException {
+		return imageUpload(file, source, true, waterMark);
+	}
 
-    @Override
-    public String singleImageUploadWithoutWatermark(MultipartFile file, FileSourceEnum source) throws SystemException {
-        return imageUpload(file, source, false, null);
-    }
+	@Override
+	public String singleImageUploadWithoutWatermark(MultipartFile file, FileSourceEnum source) throws SystemException {
+		return imageUpload(file, source, false, null);
+	}
 
-    @Override
-    public String saveOriginImage(MultipartFile file, FileSourceEnum source) throws SystemException {
-        String fileName = getuuid() + ".jpg";
-        saveFileToPath(file, compPath + source.getDynamic() + fileName);
-        return source.getDynamic() + fileName;
-    }
+	@Override
+	public String saveOriginImage(MultipartFile file, FileSourceEnum source) throws SystemException {
+		String fileName = getuuid() + ".jpg";
+		saveFileToPath(file, compPath + source.getDynamic() + fileName);
+		return source.getDynamic() + fileName;
+	}
 
-    private String imageUpload(MultipartFile image, FileSourceEnum source, boolean addWatermark, String watermark) throws SystemException {
+	private String imageUpload(MultipartFile image, FileSourceEnum source, boolean addWatermark, String watermark) throws SystemException {
         if (image == null) {
             throw new SystemException(ExceptionEnums.IMAGE_FILE_NULL);
         }
@@ -99,20 +99,17 @@ public class ApiServiceImpl implements ApiService {
         if (!outFile.exists()) {
             outFile.getParentFile().mkdirs();
         }
+        Thumbnails.Builder<File> builder = Thumbnails.of(filePath);
         // 压缩和添加水印
         try {
-            if (addWatermark) {
-                Thumbnails.of(filePath)
-                        .watermark(Positions.BOTTOM_RIGHT, ImageUtil.waterMarkByText(watermark), 0.8f)
-                        .outputQuality(0.25f)
-                        .scale(1f)
-                        .toFile(outFile);
-            } else {
-                Thumbnails.of(filePath)
-                        .outputQuality(0.25f)
-                        .scale(1f)
-                        .toFile(outFile);
+        	//图片过小不再压缩
+            if (image.getSize()/50*1024 > 1) {
+            	builder.outputQuality(0.25f);
             }
+            if (addWatermark) {
+            	builder.watermark(Positions.BOTTOM_RIGHT, ImageUtil.waterMarkByText(watermark), 0.8f);
+            }
+            builder.scale(1f).toFile(outFile);
         } catch (Exception ex) {
             logger.error(ExceptionEnums.IMAGE_FILE_COMPRESSION_FAIL.getMessage());
             ex.printStackTrace();
@@ -122,37 +119,40 @@ public class ApiServiceImpl implements ApiService {
         return relativePath;
     }
 
-    /**
-     * 保存源文件到指定路径
-     *
-     * @param file
-     * @param path
-     * @throws SystemException
-     */
-    private void saveFileToPath(MultipartFile file, String path) throws SystemException {
-        File imageFile = new File(path);
-        if (imageFile.getParentFile() != null || !imageFile.getParentFile().isDirectory()) {
-            // 创建文件
-            imageFile.getParentFile().mkdirs();
-        }
-        InputStream inputStream = null;
-        FileOutputStream fileOutputStream = null;
+	/**
+	 * 保存源文件到指定路径
+	 *
+	 * @param file
+	 * @param path
+	 * @throws SystemException
+	 */
+	private void saveFileToPath(MultipartFile file, String path) throws SystemException {
+		File imageFile = new File(path);
+		if (imageFile.getParentFile() != null || !imageFile.getParentFile().isDirectory()) {
+			// 创建文件
+			imageFile.getParentFile().mkdirs();
+		}
+		InputStream inputStream = null;
+		FileOutputStream fileOutputStream = null;
 
-        try {
-            inputStream = file.getInputStream();
-            fileOutputStream = new FileOutputStream(imageFile);
-            IOUtils.copyLarge(inputStream, fileOutputStream);
-            inputStream.close();
-            fileOutputStream.close();
-        } catch (IOException e) {
-            logger.error(ExceptionEnums.FILE_WRITE_FAIL.getMessage());
-            throw new SystemException(ExceptionEnums.IMAGE_FILE_UPLOAD_FAIL);
-        }
-    }
+		try {
+			inputStream = file.getInputStream();
+			fileOutputStream = new FileOutputStream(imageFile);
+			IOUtils.copyLarge(inputStream, fileOutputStream);
+			inputStream.close();
+			fileOutputStream.close();
+		} catch (IOException e) {
+			logger.error(ExceptionEnums.FILE_WRITE_FAIL.getMessage());
+			throw new SystemException(ExceptionEnums.IMAGE_FILE_UPLOAD_FAIL);
+		}
+	}
 
-    private String getuuid(){
-        return UUID.randomUUID().toString().replace("-", "");
-    }
+	/**
+	 * 获取uuid
+	 * 
+	 * @return
+	 */
+	private String getuuid() {
+		return UUID.randomUUID().toString().replace("-", "");
+	}
 }
-
-

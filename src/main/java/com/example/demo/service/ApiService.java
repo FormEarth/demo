@@ -6,6 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.demo.exception.SystemException;
 
 /**
+ * 图片处理
  * @author raining_heavily
  */
 public interface ApiService {

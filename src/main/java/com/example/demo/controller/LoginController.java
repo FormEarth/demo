@@ -38,7 +38,7 @@ import java.util.Set;
 @RestController
 public class LoginController {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+    private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
 
     @Autowired
     UserService userServiceImpl;
@@ -88,7 +88,7 @@ public class LoginController {
     }
 
     /**
-     * 记住密码下次自动登录
+     * 记住密码后自动登录
      * @param request
      * @return
      * @throws SystemException

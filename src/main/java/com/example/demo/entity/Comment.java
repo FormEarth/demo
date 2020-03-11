@@ -24,6 +24,8 @@ public class Comment {
     private Long articleId;
     private String commentContent;
     private Date commentTime;
+    /** 楼数 **/
+    private Integer commentIndex;
     @StaticURL
     @TableField(exist = false)
     private String avatar;
@@ -34,13 +36,13 @@ public class Comment {
     private Long replyCount;
 
     @Override
-    public String toString() {
-        return "Comment [commentId=" + commentId + ", userId=" + userId + ", articeId=" + articleId + ", commentContent="
-                + commentContent + ", commentTime=" + commentTime + ", avatar=" + avatar + ", userName=" + userName
-                + "]";
-    }
+	public String toString() {
+		return "Comment [commentId=" + commentId + ", userId=" + userId + ", articleId=" + articleId
+				+ ", commentContent=" + commentContent + ", commentTime=" + commentTime + ", commentIndex="
+				+ commentIndex + ", avatar=" + avatar + ", userName=" + userName + ", replyCount=" + replyCount + "]";
+	}
 
-    public String getAvatar() {
+	public String getAvatar() {
         return avatar;
     }
 
@@ -104,5 +106,15 @@ public class Comment {
     public void setCommentTime(Date commentTime) {
         this.commentTime = commentTime;
     }
+
+	public Integer getCommentIndex() {
+		return commentIndex;
+	}
+
+	public void setCommentIndex(Integer commentIndex) {
+		this.commentIndex = commentIndex;
+	}
+    
+    
 
 }

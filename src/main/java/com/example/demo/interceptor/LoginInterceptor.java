@@ -4,7 +4,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.example.demo.common.Dict;
-import com.example.demo.controller.ArticleController;
 import com.example.demo.entity.User;
 import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
@@ -15,6 +14,8 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.example.demo.exception.ExceptionEnums;
 import com.example.demo.exception.SystemException;
+import com.example.demo.manager.UserManager;
+import com.example.demo.manager.UserManager.UserInfo;
 
 /**
  * @author raining_heavily
@@ -38,9 +39,12 @@ public class LoginInterceptor implements HandlerInterceptor {
         logger.info("当前用户：{}" , currentLoginUser);
         if (currentLoginUser == null) {
             throw new SystemException(ExceptionEnums.USER_NOT_LOGIN);
-        } else {
-            return true;
         }
+        long token = Long.valueOf(request.getHeader("token"));
+        UserInfo userInfo = UserManager.getInstance().getUserInfo(token);
+        userInfo.setTime(System.currentTimeMillis());
+        
+        return true;
 
     }
 

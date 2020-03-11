@@ -14,7 +14,7 @@ import com.example.demo.service.BaseService;
 import org.springframework.dao.DuplicateKeyException;
 
 /**
- * BaseService的实现类，该类同样需要一个泛型
+ * BaseService的实现类
  * @Description
  * @author raining_heavily
  * @date 2019年2月21日

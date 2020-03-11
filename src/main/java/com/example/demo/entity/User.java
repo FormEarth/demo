@@ -1,14 +1,11 @@
 package com.example.demo.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.example.demo.aop.annotation.StaticURL;
-import com.example.demo.exception.SystemException;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
-
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
@@ -24,7 +21,11 @@ import java.sql.Timestamp;
 @TableName(value = "user")
 public class User implements Serializable, Cloneable {
 
-    // 若没有开启驼峰命名，或者表中列名不符合驼峰规则，可通过该注解指定数据库表中的列名，exist标明数据表中有没有对应列
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	// 若没有开启驼峰命名，或者表中列名不符合驼峰规则，可通过该注解指定数据库表中的列名，exist标明数据表中有没有对应列
     // @TableField(value = "sex",exist = true)
     /**
      * 用户id,该字段为自增策略
