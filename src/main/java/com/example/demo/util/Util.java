@@ -11,6 +11,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import java.awt.image.BufferedImage;
@@ -20,11 +25,14 @@ import java.math.RoundingMode;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -281,6 +289,68 @@ public class Util {
 		System.out.println(properties.get("os.version"));
 		System.out.println(properties.get("user.name"));
 	}
+	
+	/**
+	 * AES 加密
+	 * @param encryptedStr
+	 * @param key
+	 * @return
+	 */
+	public static String AESEncrypt(String encryptedStr,String key) {
+		byte[] encrypted = null;
+		try {
+			byte[] raw = key.getBytes("utf-8");
+			SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
+			Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");//"算法/模式/补码方式"
+			cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
+			encrypted = cipher.doFinal(encryptedStr.getBytes("utf-8"));
+		} catch (InvalidKeyException e) {
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		} catch (NoSuchPaddingException e) {
+			e.printStackTrace();
+		} catch (IllegalBlockSizeException e) {
+			e.printStackTrace();
+		} catch (BadPaddingException e) {
+			e.printStackTrace();
+		}
+		return Base64.getEncoder().encodeToString(encrypted);
+	}
+	
+	/**
+	 * AES 解密
+	 * @param decryptedStr
+	 * @param key
+	 * @return
+	 */
+	public static String AESDecrypt(String decryptedStr,String key) {
+		String result = null;
+		try {
+			byte[] raw = decryptedStr.getBytes("utf-8");
+			SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
+			Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+			cipher.init(Cipher.DECRYPT_MODE, skeySpec);
+			byte[] decrypted = Base64.getDecoder().decode(decryptedStr);
+			byte[] original = cipher.doFinal(decrypted);
+			result = new String(original,"utf-8");
+		} catch (InvalidKeyException e) {
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		} catch (NoSuchPaddingException e) {
+			e.printStackTrace();
+		} catch (IllegalBlockSizeException e) {
+			e.printStackTrace();
+		} catch (BadPaddingException e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
 
 	public static void readFormFile() throws IOException, SystemException {
 		String path = "C:\\Users\\chunyangwang\\Desktop\\aaa.txt";
@@ -294,6 +364,7 @@ public class Util {
 			System.out.println(handleStr.replace("${0}", caseStr).replace("${1}", line));
 //            System.out.println(str);
 		}
+		bufferedReader.close();
 
 	}
 
@@ -327,7 +398,10 @@ public class Util {
 //        System.out.println(l.equals(-1));
 //        shellExecute("D:/gitbox/hexo-blog/","cmd","/c","hexo generate");
 		//readFormFile();
-		dateTransfer();
+		//dateTransfer();
+		String str = AESEncrypt("123","1234567890123451");
+		System.out.println(str);
+		System.out.print(new String(Base64.getDecoder().decode(str),"utf-8"));
 	}
 
 }

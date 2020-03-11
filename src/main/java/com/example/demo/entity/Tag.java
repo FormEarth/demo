@@ -112,11 +112,11 @@ public class Tag {
         this.updater = updater;
     }
 
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     public Date getUpdateTime() {
         return updateTime;
     }
 
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
     }

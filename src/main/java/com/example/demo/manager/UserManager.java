@@ -16,8 +16,7 @@ import com.example.demo.exception.SystemException;
  */
 public class UserManager {
 
-	private UserManager() {
-	};
+	private UserManager() { };
 
 	private static ConcurrentHashMap<Long, UserInfo> loginUsers;
 
@@ -27,9 +26,11 @@ public class UserManager {
 
 	public static UserManager getInstance() {
 		// 移除超时用户
-		for (Entry<Long, UserInfo> entry : loginUsers.entrySet()) {
-			UserInfo userInfo = entry.getValue();
-
+		if(loginUsers != null) {
+			for (Entry<Long, UserInfo> entry : loginUsers.entrySet()) {
+				UserInfo userInfo = entry.getValue();
+				loginUsers.remove(entry.getKey());
+			}
 		}
 		return UserManagerHelper.userManager;
 	}
