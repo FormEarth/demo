@@ -1,5 +1,13 @@
 package com.example.demo.util;
 
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.imaging.ImageProcessingException;
+import com.drew.metadata.Directory;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.exif.ExifIFD0Directory;
+import com.example.demo.exception.SystemException;
+import org.springframework.web.multipart.MultipartFile;
+
 import javax.imageio.ImageIO;
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -8,10 +16,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.Date;
 
 /**
@@ -131,5 +136,22 @@ public class ImageUtil {
 			}
 		}
 		return width;
+	}
+
+	public static String getOrientation(MultipartFile file) throws SystemException {
+		Metadata metadata;
+		String orientation = null;
+		try {
+			metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(file.getInputStream()),false);
+		} catch (ImageProcessingException | IOException e) {
+			e.printStackTrace();
+//			throw new SystemException(ExceptionEnums.IMAGE_HANDLE_ERROR);
+			return null;
+		}
+
+		for(Directory directory : metadata.getDirectories()){
+			orientation = directory.getString(ExifIFD0Directory.TAG_ORIENTATION);
+		}
+		return orientation;
 	}
 }
