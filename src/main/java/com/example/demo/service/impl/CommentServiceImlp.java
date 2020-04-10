@@ -23,9 +23,9 @@ public class CommentServiceImlp extends BaseServiceImpl<Comment> implements Comm
 	ReplyMapper replyMapper;
 	
 	@Override
-	public List<Comment> queryCommentsWithUser(long articeId) {
-		List<Comment> comments = new ArrayList<>();
-		comments = commentMapper.queryCommentsWithUser(articeId);
+	public List<Comment> queryCommentsWithUser(String writingId) {
+		List<Comment> comments;
+		comments = commentMapper.queryCommentsWithUser(writingId);
 		return comments;
 	}
 

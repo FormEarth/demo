@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.example.demo.aop.annotation.StaticURL;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
 
 /**
  * @author raining_heavily
@@ -15,14 +16,16 @@ import com.fasterxml.jackson.annotation.JsonFormat;
  * @time 下午7:51:14
  * @description 评论表（文章的评论）
  */
+@Data
 @TableName(value = "demo_comment")
 public class Comment {
 
     @TableId(value = "comment_id", type = IdType.AUTO)
     private Long commentId;
     private Long userId;
-    private Long articleId;
+    private String writingId;
     private String commentContent;
+    private Integer commentStatus;
     private Date commentTime;
     @StaticURL
     @TableField(exist = false)
@@ -33,76 +36,9 @@ public class Comment {
     /** 评论下面的回复数 **/
     private Long replyCount;
 
-    @Override
-    public String toString() {
-        return "Comment [commentId=" + commentId + ", userId=" + userId + ", articeId=" + articleId + ", commentContent="
-                + commentContent + ", commentTime=" + commentTime + ", avatar=" + avatar + ", userName=" + userName
-                + "]";
-    }
-
-    public String getAvatar() {
-        return avatar;
-    }
-
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public Long getCommentId() {
-        return commentId;
-    }
-
-    public void setCommentId(Long commentId) {
-        this.commentId = commentId;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Long getArticleId() {
-        return articleId;
-    }
-
-    public void setArticleId(Long articleId) {
-        this.articleId = articleId;
-    }
-
-    public Long getReplyCount() {
-        return replyCount;
-    }
-
-    public void setReplyCount(Long replyCount) {
-        this.replyCount = replyCount;
-    }
-
-    public String getCommentContent() {
-        return commentContent;
-    }
-
-    public void setCommentContent(String commentContent) {
-        this.commentContent = commentContent;
-    }
-
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     public Date getCommentTime() {
         return commentTime;
-    }
-
-    public void setCommentTime(Date commentTime) {
-        this.commentTime = commentTime;
     }
 
 }

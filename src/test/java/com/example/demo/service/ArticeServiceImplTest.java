@@ -54,12 +54,12 @@ public class ArticeServiceImplTest extends DemoApplicationTests{
 			Article article = new Article();
 			article.setTitle("this is test"+i);
 			article.setContent("this is content"+i);
-			article.setCodeStyle("github");
-			
-			article.setAuthor(1001L);
-			article.setCreater(1001L);
-			article.setCreateTime(date);
-			article.setUpdater(1001);
+//			article.setCodeStyle("github");
+//
+//			article.setAuthor(1001L);
+//			article.setCreater(1001L);
+//			article.setCreateTime(date);
+//			article.setUpdater(1001);
 			article.setUpdateTime(date);
 			
 			list.add(article);
@@ -74,11 +74,11 @@ public class ArticeServiceImplTest extends DemoApplicationTests{
 	//@Test
 	public void updateArtice() throws SystemException{
 		Article artice = new Article();
-		artice.setArticleId(1012L);
+//		artice.setArticleId(1012L);
 		artice.setTitle("是个测试");
 		artice.setContent("> 没有什么是永恒的\n\n散落在指尖的阳光，我试着轻轻抓住光影的踪迹，它却在眉宇间投下一片淡淡的阴影.调皮的阳光掀动了四月的心帘，温暖如约的歌声渐起。似乎在诉说着，我也可以在漆黑的角落里，找到阴影背后的阳光，找到阳光与阴影奏出和谐的旋律。我要用一颗敏感赤诚的心迎接每一缕滑过指尖的阳光！\n```Java\n\nString str = \"Hello World!\" \n\nSystem.out.println(str);\n```\n\n**文字加粗了**");
-		artice.setCreater(1001L);
-		artice.setUpdater(1001L);
+//		artice.setCreater(1001L);
+//		artice.setUpdater(1001L);
 		artice.setUpdateTime(new Date());
 		articleService.updateById(artice);
     }

@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.demo.entity.JSONDataResult;
 import com.example.demo.entity.JSONResult;
 import com.example.demo.exception.SystemException;
-import com.example.demo.service.ApiService;
+import com.example.demo.service.ImageService;
 
 /**
  * @author raining_heavily
@@ -33,13 +33,13 @@ public class ApiController {
 	}
 	
 	@Autowired
-	ApiService apiService;
+	ImageService imageService;
 
 	@StaticURL
 	@RequestMapping(value="/image",method=RequestMethod.POST)
 	public JSONResult imageUpload(@RequestParam("image") MultipartFile file) throws SystemException {
 		
-		String relativePath = apiService.singleImageUpload(file, Dict.GLOBAL_WATERMARK, FileSourceEnum.ARTICLE);
+		String relativePath = imageService.singleImageUpload(file, Dict.GLOBAL_WATERMARK, FileSourceEnum.ARTICLE);
 		return new JSONDataResult().add("relativePath", relativePath);
 	}
 }

@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.entity.Article;
+import com.example.demo.entity.Writing;
 import com.example.demo.exception.SystemException;
 
 import java.util.List;
@@ -15,7 +16,7 @@ public interface ArticleService extends BaseService<Article> {
      * @param article
      * @throws SystemException
      */
-    void articleHandle(Article article) throws SystemException;
+    void articleHandle(Writing  article) throws SystemException;
 
     /**
      * 首页文章查询

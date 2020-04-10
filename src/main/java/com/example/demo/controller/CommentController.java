@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -31,6 +32,26 @@ public class CommentController {
 	@Autowired
 	CommentService commentService;
 
+	/**
+	 * 根据作品Id获取评论
+	 * @param writingId
+	 * @return
+	 */
+	@StaticURL
+	@RequestMapping(value = { "/{writingId}/comments" }, method = RequestMethod.GET)
+	public JSONResult getCommentsByWritingId(@PathVariable String writingId){
+		//如果允许评论，查询评论
+		List<Comment> comments;
+		comments = commentService.queryCommentsWithUser(writingId);
+		return new JSONDataResult().add("comments", comments);
+	}
+
+	/**
+	 * 添加评论
+	 * @param comment
+	 * @return
+	 * @throws SystemException
+	 */
 	@RequestMapping(value = { "/comment" }, method = RequestMethod.POST)
 	public JSONResult addComment(@RequestBody Comment comment) throws SystemException {
 		User user = (User) SecurityUtils.getSubject().getPrincipal();
@@ -39,7 +60,13 @@ public class CommentController {
 		commentService.add(comment);
 		return new JSONDataResult().add("commentId", comment.getCommentId());
 	}
-	
+
+	/**
+	 * 删除评论
+	 * @param commentId
+	 * @return
+	 * @throws SystemException
+	 */
 	@RequestMapping(value = { "/comment" }, method = RequestMethod.DELETE)
 	public JSONResult deleteComment(long commentId) throws SystemException {
 		commentService.delete(new QueryWrapper<Comment>().eq("comment_id", commentId));
@@ -59,14 +86,26 @@ public class CommentController {
 		List<Reply> replies = commentService.queryRepliesWithUser(commentId);
 		return new JSONDataResult().add("replies",replies );
 	}
-	
+
+	/**
+	 * 添加回复
+	 * @param reply
+	 * @return
+	 * @throws SystemException
+	 */
 	@RequestMapping(value = { "/reply" }, method = RequestMethod.POST)
 	public JSONResult addOneReply(@RequestBody Reply reply) throws SystemException {
 		reply.setReplyTime(new Date());
 		commentService.addOneReply(reply);
 		return new JSONDataResult().add("replyId", reply.getReplyId());
 	}
-	
+
+	/**
+	 * 删除回复
+	 * @param replyId
+	 * @return
+	 * @throws SystemException
+	 */
 	@RequestMapping(value = { "/reply" }, method = RequestMethod.DELETE)
 	public JSONResult deleteOneReply(long replyId) throws SystemException {
 		commentService.deleteOneReply(replyId);

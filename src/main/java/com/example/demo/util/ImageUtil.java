@@ -1,6 +1,15 @@
 package com.example.demo.util;
 
-import javax.imageio.ImageIO;
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.imaging.ImageProcessingException;
+import com.drew.metadata.Directory;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.exif.ExifIFD0Directory;
+import com.example.demo.exception.ExceptionEnums;
+import com.example.demo.exception.SystemException;
+import net.coobird.thumbnailator.Thumbnails;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Font;
@@ -8,11 +17,9 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Date;
 
 /**
  * 
@@ -25,23 +32,16 @@ public class ImageUtil {
 	/**
 	 * 生成背景透明的 文字水印，文字位于透明区域正中央，可设置旋转角度
 	 *
-	 * @param width
-	 *            生成图片宽度
-	 * @param heigth
-	 *            生成图片高度
-	 * @param text
-	 *            水印文字
-	 * @param color
-	 *            颜色对象
-	 * @param font
-	 *            awt字体
-	 * @param degree
-	 *            水印文字旋转角度
-	 * @param alpha
-	 *            水印不透明度0f-1.0f
+	 * @param width  生成图片宽度
+	 * @param heigth 生成图片高度
+	 * @param text   水印文字
+	 * @param color  颜色对象
+	 * @param font   awt字体
+	 * @param degree 水印文字旋转角度
+	 * @param alpha  水印不透明度0f-1.0f
 	 */
 	public static BufferedImage waterMarkByText(int width, int heigth, String text, Color color, Font font,
-			Double degree, float alpha) {
+												Double degree, float alpha) {
 		BufferedImage buffImg = new BufferedImage(width, heigth, BufferedImage.TYPE_INT_RGB);
 		/** 2、得到画笔对象 */
 		Graphics2D g2d = buffImg.createGraphics();
@@ -77,8 +77,8 @@ public class ImageUtil {
 		// 获取真实宽度
 		float realWidth = getRealFontWidth(text);
 		float fontSize = font.getSize();
-		System.out.println("----------------"+realWidth+","+fontSize);
-		System.out.println("----------------y:"+(width-realWidth));
+		System.out.println("----------------" + realWidth + "," + fontSize);
+		System.out.println("----------------y:" + (width - realWidth));
 		// 计算绘图偏移x、y，使得使得水印文字在图片中居中
 		// 这里需要理解x、y坐标是基于Graphics2D.rotate过后的坐标系
 //		float x = 0.5f * width - 0.5f * fontSize * realWidth;
@@ -132,4 +132,39 @@ public class ImageUtil {
 		}
 		return width;
 	}
+
+	/**
+	 *
+	 * @param file
+	 * @return 返回图片的偏转信息orientation，不存在返回null
+	 * @throws ImageProcessingException
+	 * @throws IOException
+	 */
+	public static String getOrientation(MultipartFile file) throws SystemException {
+		Metadata metadata;
+		String orientation = null;
+		try {
+			metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(file.getInputStream()),false);
+		} catch (ImageProcessingException | IOException e) {
+			e.printStackTrace();
+//			throw new SystemException(ExceptionEnums.IMAGE_HANDLE_ERROR);
+			return null;
+		}
+
+		for(Directory directory : metadata.getDirectories()){
+			orientation = directory.getString(ExifIFD0Directory.TAG_ORIENTATION);
+		}
+		return orientation;
+	}
+
+	public static void main(String[] args) throws ImageProcessingException, IOException {
+//		getExif("D:\\gitbox\\index\\image\\yuantu.jpg");
+//		getExif("D:\\gitbox\\index\\image\\yasuo.jpg");
+//		getExif("D:\\gitbox\\index\\image\\acg1.jpg");
+		String path = "C:\\Users\\chunyangwang\\Desktop\\test\\test.jpg";
+		Thumbnails.of(path).outputQuality(1.0f).scale(1f).toFile("C:\\Users\\chunyangwang\\Desktop\\test\\test1.jpg");
+		Thumbnails.of(path).outputQuality(0.25f).scale(1f).toFile("C:\\Users\\chunyangwang\\Desktop\\test\\test2.jpg");
+	}
+
+
 }

@@ -1,9 +1,7 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.common.Dict;
-import com.example.demo.entity.ArticleTag;
-import com.example.demo.entity.Tag;
-import com.example.demo.entity.User;
+import com.example.demo.entity.*;
 import com.example.demo.exception.ExceptionEnums;
 import com.example.demo.exception.SystemException;
 import com.example.demo.mapper.ArticleMapper;
@@ -13,9 +11,9 @@ import com.example.demo.util.Util;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.entity.Article;
 import com.example.demo.service.ArticleService;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,23 +37,21 @@ public class ArticleServiceImpl extends BaseServiceImpl<Article> implements Arti
     ArticleTagMapper articleTagMapper;
     @Autowired
     ArticleMapper articleMapper;
+    @Autowired
+    MongoTemplate mongoTemplate;
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
-    public void articleHandle(Article article) throws SystemException {
+    public void articleHandle(Writing article) throws SystemException {
         Date date = new Date();
         User user = (User) SecurityUtils.getSubject().getPrincipal();
         article.setSummary(MarkdownParser.toText(article.getContent(), 200));
-        article.setAuthor(user.getUserId());
-        article.setAuthorName(user.getUserName());
         article.setCreateTime(date);
-        article.setStatus(Dict.ARTICLE_STATUS_NORMAL);
+        article.setType(Dict.WRITING_TYPE_ARTICLE);
         article.setSendTime(date);
-        articleMapper.insert(article);
-        for (Tag tag : article.getTags()) {
-            ArticleTag articleTag = new ArticleTag(article.getArticleId(), tag.getTagId());
-            articleTagMapper.insert(articleTag);
-        }
+        article.setStatus(Dict.WRITING_STATUS_NORMAL);
+        article.setCreatorId(user.getUserId());
+        article.setPageview(0L);
+        mongoTemplate.insert(article);
         if (article.getSaveToFile()) {
             try {
                 writeContentToFile(article);
@@ -83,8 +79,8 @@ public class ArticleServiceImpl extends BaseServiceImpl<Article> implements Arti
         }else{
             //阅读量+1
             Article article1 = new Article();
-            article1.setArticleId(article.getArticleId());
-            article1.setReaderNum(article.getReaderNum()+1);
+//            article1.setArticleId(article.getArticleId());
+//            article1.setReaderNum(article.getReaderNum()+1);
             articleMapper.updateById(article1);
         }
         return article;
@@ -95,7 +91,7 @@ public class ArticleServiceImpl extends BaseServiceImpl<Article> implements Arti
      * @param article
      * @throws IOException
      */
-    private void writeContentToFile(Article article) throws IOException {
+    private void writeContentToFile(Writing article) throws IOException {
         LocalDateTime dateTime = LocalDateTime.now();
         StringBuffer sb = new StringBuffer();
         sb.append("---\n");
