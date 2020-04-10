@@ -61,6 +61,8 @@ public enum ExceptionEnums {
 	COMMAND_EXECUTE_FAILED("1113","命令执行失败"),
 	/** 新密码与旧密码相同 */
 	SAME_PASSWORD_ERROR("1114","新旧密码相同"),
+	/** 图片处理失败 */
+	IMAGE_HANDLE_ERROR("1115","图片处理失败"),
 	/** 默认的成功 */
 	DEFAULT_SUCCESS("2000","请求成功"),
 	/** 服务器异常 */

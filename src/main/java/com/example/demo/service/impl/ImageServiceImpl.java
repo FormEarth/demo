@@ -16,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.exception.ExceptionEnums;
 import com.example.demo.exception.SystemException;
-import com.example.demo.service.ApiService;
+import com.example.demo.service.ImageService;
 import com.example.demo.util.ImageUtil;
 
 import net.coobird.thumbnailator.Thumbnails;
@@ -27,9 +27,9 @@ import net.coobird.thumbnailator.geometry.Positions;
  * @author raining_heavily
  */
 @Service
-public class ApiServiceImpl implements ApiService {
+public class ImageServiceImpl implements ImageService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ApiServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(ImageServiceImpl.class);
     /**
      * 图片类型gif
      **/
@@ -64,7 +64,7 @@ public class ApiServiceImpl implements ApiService {
     @Override
     public String saveOriginImage(MultipartFile file, FileSourceEnum source) throws SystemException {
         String fileName = getuuid() + ".jpg";
-        saveFileToPath(file, compPath + source.getDynamic() + fileName);
+        saveFileToPath(file, compPath + source.getDynamic() + fileName,0);
         return source.getDynamic() + fileName;
     }
 
@@ -86,33 +86,41 @@ public class ApiServiceImpl implements ApiService {
         // 压缩图片路径
         String thumbnailFilePath = compPath + relativePath;
         logger.info("压缩图片路径：" + thumbnailFilePath);
+
+        //修正图片带有旋转的情况
+        String orientation = ImageUtil.getOrientation(image);
+        double angles = 0;
+
+        if ("3".equals(orientation)) {
+            angles = 180;
+        } else if ("6".equals(orientation)) {
+            angles = 90;
+        } else if ("8".equals(orientation)) {
+            angles = -90;
+        }
+        logger.info("图片旋转{},角度{}",orientation,angles);
+
         if (GIF.equals(fileType)) {
             fileName = uuid + ".gif";
             relativePath = source.getDynamic() + fileName;
-            saveFileToPath(image, compPath + relativePath);
+            saveFileToPath(image, compPath + relativePath,angles);
             return relativePath;
         } else {
-            saveFileToPath(image, filePath);
+            saveFileToPath(image, filePath,angles);
         }
 
         File outFile = new File(thumbnailFilePath);
         if (!outFile.exists()) {
             outFile.getParentFile().mkdirs();
         }
+
         // 压缩和添加水印
         try {
+            Thumbnails.Builder<? extends InputStream> builder = Thumbnails.of(image.getInputStream());
             if (addWatermark) {
-                Thumbnails.of(filePath)
-                        .watermark(Positions.BOTTOM_RIGHT, ImageUtil.waterMarkByText(watermark), 0.8f)
-                        .outputQuality(0.25f)
-                        .scale(1f)
-                        .toFile(outFile);
-            } else {
-                Thumbnails.of(filePath)
-                        .outputQuality(0.25f)
-                        .scale(1f)
-                        .toFile(outFile);
+                builder = builder.watermark(Positions.BOTTOM_RIGHT, ImageUtil.waterMarkByText(watermark), 0.8f);
             }
+            builder.outputQuality(0.25f).rotate(angles).scale(1f).toFile(outFile);
         } catch (Exception ex) {
             logger.error(ExceptionEnums.IMAGE_FILE_COMPRESSION_FAIL.getMessage());
             ex.printStackTrace();
@@ -129,7 +137,7 @@ public class ApiServiceImpl implements ApiService {
      * @param path
      * @throws SystemException
      */
-    private void saveFileToPath(MultipartFile file, String path) throws SystemException {
+    private void saveFileToPath(MultipartFile file, String path,double angles) throws SystemException {
         File imageFile = new File(path);
         if (imageFile.getParentFile() != null || !imageFile.getParentFile().isDirectory()) {
             // 创建文件
@@ -148,9 +156,16 @@ public class ApiServiceImpl implements ApiService {
             logger.error(ExceptionEnums.FILE_WRITE_FAIL.getMessage());
             throw new SystemException(ExceptionEnums.IMAGE_FILE_UPLOAD_FAIL);
         }
+        //TODO Thumbnails保存原图并旋转时会导致图片部分信息丢失，即使设定原图原比例保存，图片大小仍会被放大数倍，因此直接保存了原图
+//        try {
+//            Thumbnails.of(file.getInputStream()).rotate(angles).outputQuality(1f).scale(1f).toFile(path);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            throw new SystemException(ExceptionEnums.IMAGE_FILE_UPLOAD_FAIL);
+//        }
     }
 
-    private String getuuid(){
+    private String getuuid() {
         return UUID.randomUUID().toString().replace("-", "");
     }
 }

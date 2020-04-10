@@ -6,7 +6,8 @@ import com.example.demo.common.FileSourceEnum;
 import com.example.demo.entity.*;
 import com.example.demo.exception.ExceptionEnums;
 import com.example.demo.exception.SystemException;
-import com.example.demo.service.ApiService;
+import com.example.demo.service.CommentService;
+import com.example.demo.service.ImageService;
 import com.example.demo.service.TagService;
 import com.example.demo.service.UserService;
 import com.example.demo.util.Util;
@@ -25,7 +26,6 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -49,11 +49,13 @@ public class AtlasController {
     @Autowired
     MongoTemplate mongoTemplate;
     @Autowired
-    ApiService apiService;
+    ImageService imageService;
     @Autowired
     UserService userService;
     @Autowired
     TagService tagService;
+    @Autowired
+    CommentService commentService;
     @Value("${image.access.url}")
     private String accessPref;
 
@@ -61,39 +63,39 @@ public class AtlasController {
      * 创建图集
      *
      * @param files
-     * @param atlas
+     * @param writing
      * @return
      * @throws SystemException
      */
     @RequestMapping(value = "/atlas", method = RequestMethod.POST)
-    public JSONResult createOneAtlas(@RequestParam("images") MultipartFile[] files, Atlas atlas) throws SystemException {
+    public JSONResult createOneAtlas(@RequestParam("images") MultipartFile[] files, Writing writing) throws SystemException {
         List<String> imageList = new ArrayList<>();
         if (null != files && files.length > 0) {
             //多图片处理
             for (MultipartFile file : files) {
-                String relativePath = apiService.singleImageUpload(file, Dict.GLOBAL_WATERMARK, FileSourceEnum.ATLAS);
+                String relativePath = imageService.singleImageUpload(file, Dict.GLOBAL_WATERMARK, FileSourceEnum.ATLAS);
                 imageList.add(relativePath);
             }
         }
         logger.info("图片数量:" + files.length + ",图片相对路径：" + imageList);
         Date nowDate = new Date();
-        atlas.setAtlasPictures(imageList);
-        atlas.setIdentical(Util.checkImagesProportion(files));
+        writing.setAtlasPictures(imageList);
+//        writing.setIdentical(Util.checkImagesProportion(files));
         User currentLoginUser = (User) SecurityUtils.getSubject().getPrincipal();
         //处理标签，新建或者更新
-        List<Tag> tagList = atlas.getAtlasTags();
+        List<Tag> tagList = writing.getTags();
         if (tagList != null) {
-            tagService.handleTagList(tagList,true);
+            tagService.handleTagList(tagList, true);
         } else {
             //空时添加空list
-            atlas.setAtlasTags(new ArrayList<>());
+            writing.setTags(new ArrayList<>());
         }
-        atlas.setAtlasStatus(Dict.TAG_STATUS_NORMAL);
-        atlas.setCreater(currentLoginUser.getUserId());
-        atlas.setSendTime(nowDate);
-        mongoTemplate.insert(atlas);
-        String objectId = atlas.getAtlasId();
-        //TODO 需要将id存入mysql
+        writing.setType(Dict.WRITING_TYPE_ATLAS);
+        writing.setStatus(Dict.WRITING_STATUS_NORMAL);
+        writing.setCreatorId(currentLoginUser.getUserId());
+        writing.setSendTime(nowDate);
+        mongoTemplate.insert(writing);
+        String objectId = writing.getWritingId();
         return new JSONDataResult().add("id", objectId);
     }
 
@@ -190,51 +192,19 @@ public class AtlasController {
     }
 
     /**
-     * 根据图集Id查看详情//TODO 编辑和查看未作区分
+     * 根据作品id删除作品
      *
-     * @param atlasId
+     * @param writingId
      * @return
      * @throws SystemException
      */
-    @StaticURL
-    @RequestMapping(value = "/atlas/{atlasId}", method = RequestMethod.GET)
-    public JSONResult queryAtlasDetailById(@PathVariable String atlasId) throws SystemException {
-
-        Atlas atlas = mongoTemplate.findById(atlasId, Atlas.class);
-        if (atlas == null) {
-            throw new SystemException(ExceptionEnums.SELECT_DATA_IS_EMPTY);
-        }
-        //如果是仅个人可见
-        if (atlas.isPersonal()) {
-            User currentLoginUser = (User) SecurityUtils.getSubject().getPrincipal();
-            if (currentLoginUser == null || !atlas.getCreater().equals(currentLoginUser.getUserId())) {
-                throw new SystemException(ExceptionEnums.SOURCE_NOT_PERMIT);
-            }
-        }
-        //如果允许评论，查询评论
-//        if(atlas.isComment()){
-//            List<Comment> comments = new ArrayList<>();
-//        }
-//        User currentLoginUser = (User) SecurityUtils.getSubject().getPrincipal();
-        User user = userService.queryCommonInfo(atlas.getCreater());
-        atlas.setUser(user);
-        return new JSONDataResult().add("atlas", atlas);
-    }
-
-    /**
-     * 删除指定图集
-     *
-     * @param atlasId
-     * @return
-     * @throws SystemException
-     */
-    @RequestMapping(value = "/atlas/{atlasId}", method = RequestMethod.DELETE)
-    public JSONResult removeAtlasByAtlasId(@PathVariable String atlasId) throws SystemException {
+    @RequestMapping(value = "/atlas/{writingId}", method = RequestMethod.DELETE)
+    public JSONResult removeAtlasByAtlasId(@PathVariable String writingId) throws SystemException {
         User currentLoginUser = (User) SecurityUtils.getSubject().getPrincipal();
         Query query = new Query();
-        query.addCriteria(Criteria.where("_id").is(atlasId));
-        query.addCriteria(Criteria.where("creater").is(currentLoginUser.getUserId()));
-        UpdateResult result = mongoTemplate.updateFirst(query, new Update().set("atlasStatus", Dict.TAG_STATUS_DELETED), "atlas");
+        query.addCriteria(Criteria.where("_id").is(writingId));
+        query.addCriteria(Criteria.where("creatorId").is(currentLoginUser.getUserId()));
+        UpdateResult result = mongoTemplate.updateFirst(query, new Update().set("status", Dict.WRITING_STATUS_DELETED), "writing");
         if (result.getModifiedCount() < 1) {
             throw new SystemException(ExceptionEnums.DATA_DELETE_FAIL);
         }
@@ -242,7 +212,7 @@ public class AtlasController {
     }
 
     /**
-     * 图集修改<br>
+     * 图集编辑<br>
      * 不允许图片修改
      *
      * @param
@@ -250,21 +220,22 @@ public class AtlasController {
      * @throws SystemException
      */
     @RequestMapping(value = "/atlas", method = RequestMethod.PUT)
-    public JSONResult modifyAtlas(@RequestBody Atlas atlas) throws SystemException {
+    public JSONResult modifyAtlas(@RequestBody Writing writing) throws SystemException {
         User currentLoginUser = (User) SecurityUtils.getSubject().getPrincipal();
-        if(atlas.getAtlasTags()!=null){
-            //TODO 不应该再把标签热度+1，tip：是否只
-            tagService.handleTagList(atlas.getAtlasTags(),false);
+        if (writing.getTags() != null) {
+            tagService.handleTagList(writing.getTags(), false);
         }
-        Query query = new Query().addCriteria(Criteria.where("_id").is(atlas.getAtlasId())).addCriteria(Criteria.where("creater").is(currentLoginUser.getUserId()));
+        Query query = new Query().addCriteria(Criteria.where("_id").is(writing.getWritingId())).addCriteria(Criteria.where("creatorId").is(currentLoginUser.getUserId()));
         //向数组末尾增加元素
-        Update update = new Update().push("atlasContent",atlas.getAtlasContent().get(atlas.getAtlasContent().size()-1));
-        update.set("atlasTags",atlas.getAtlasTags());
-        update.set("updater",currentLoginUser.getUserId());
-        update.set("updateTime",new Date());
-        update.set("personal",atlas.isPersonal());
-        update.set("comment",atlas.isComment());
-        UpdateResult result = mongoTemplate.updateFirst(query,update,Atlas.class);
+        Update update = new Update().set("content", writing.getContent())
+                .set("tags", writing.getTags())
+                .set("updater", currentLoginUser.getUserId())
+                .set("updateTime", new Date())
+                .set("personal", writing.getPersonal())
+                .set("comment", writing.getComment())
+                .set("modified", true)
+                .set("modifiedTime", new Date());
+        UpdateResult result = mongoTemplate.updateFirst(query, update, Writing.class);
         if (result.getModifiedCount() < 1) {
             throw new SystemException(ExceptionEnums.DATA_UPDATE_FAIL);
         }

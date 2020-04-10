@@ -11,7 +11,7 @@ import com.example.demo.entity.JSONResult;
 import com.example.demo.entity.User;
 import com.example.demo.exception.ExceptionEnums;
 import com.example.demo.exception.SystemException;
-import com.example.demo.service.ApiService;
+import com.example.demo.service.ImageService;
 import com.example.demo.service.CollectionService;
 import com.example.demo.service.UserService;
 import com.example.demo.util.Util;
@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.Map;
 
@@ -40,7 +39,7 @@ public class UserController {
     @Autowired
     UserService userServiceImpl;
     @Autowired
-    ApiService apiService;
+    ImageService imageService;
     @Autowired
     CollectionService collectionService;
 
@@ -106,12 +105,12 @@ public class UserController {
         User user = new User();
         String relativePath = "";
         if (Dict.AVATAR.equals(type)) {
-            relativePath = apiService.singleImageUploadWithoutWatermark(file, FileSourceEnum.AVATAR);
+            relativePath = imageService.singleImageUploadWithoutWatermark(file, FileSourceEnum.AVATAR);
             //将session中获用户信息一并更新
             loginUser.setAvatar(relativePath);
             user.setAvatar(relativePath);
         } else if (Dict.FRONTCOVER.equals(type)) {
-            relativePath = apiService.saveOriginImage(file, FileSourceEnum.FRONT_COVER);
+            relativePath = imageService.saveOriginImage(file, FileSourceEnum.FRONT_COVER);
             loginUser.setFrontCover(relativePath);
             user.setFrontCover(relativePath);
         }

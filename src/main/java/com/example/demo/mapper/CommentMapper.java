@@ -10,10 +10,10 @@ public interface CommentMapper extends BaseMapper<Comment> {
 	/**
 	 * 查询所有评论和评论用户信息
 	 * 
-	 * @param articleId 文章id
+	 * @param writingId 文章id
 	 * @return
 	 */
-	List<Comment> queryCommentsWithUser(long articleId);
+	List<Comment> queryCommentsWithUser(String writingId);
 	
 	/**
 	 * 查询指定回复及其用户信息

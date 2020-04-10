@@ -11,10 +11,10 @@ public interface CommentService extends BaseService<Comment>{
 	/**
 	 * 查询评论
 	 * 
-	 * @param articeId 文章id
+	 * @param writingId 文章id
 	 * @return
 	 */
-	List<Comment> queryCommentsWithUser(long articeId);
+	List<Comment> queryCommentsWithUser(String writingId);
 	
 	/**
 	 * 查询回复

@@ -6,7 +6,6 @@ import com.example.demo.aop.annotation.StaticURL;
 import com.example.demo.common.Dict;
 import com.example.demo.common.FileSourceEnum;
 import com.example.demo.entity.*;
-import com.example.demo.exception.ExceptionEnums;
 import com.example.demo.exception.SystemException;
 import com.example.demo.service.*;
 import com.example.demo.util.Util;
@@ -15,6 +14,7 @@ import org.apache.shiro.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -39,31 +39,31 @@ public class ArticleController {
     @Autowired
     TagService tagService;
     @Autowired
-    ApiService apiService;
+    ImageService imageService;
 
     /**
-     * 创建长文
-     * @param article
+     * 创建长文章
+     * @param writing
      * @return
      * @throws SystemException
      */
     @RequestMapping(value="/article",method = RequestMethod.POST)
-    public JSONResult createNewArticle(@RequestParam(value = "image",required = false) MultipartFile file, Article article) throws SystemException {
+    public JSONResult createNewArticle(@RequestParam(value = "image",required = false) MultipartFile file, Writing writing) throws SystemException {
 
         User user = (User) SecurityUtils.getSubject().getPrincipal();
         if(file == null){
-            article.setFrontCover(user.getFrontCover());
+            writing.setFrontCover(user.getFrontCover());
         }else{
             //上传
-            String relativePath = apiService.singleImageUploadWithoutWatermark(file, FileSourceEnum.ARTICLE);
-            article.setFrontCover(relativePath);
+            String relativePath = imageService.singleImageUploadWithoutWatermark(file, FileSourceEnum.ARTICLE);
+            writing.setFrontCover(relativePath);
         }
         //标签处理
-        tagService.handleTagList(article.getTags(),true);
+        tagService.handleTagList(writing.getTags(),true);
         //文章处理
-        articleService.articleHandle(article);
+        articleService.articleHandle(writing);
         //新增后返回articleId
-        return new JSONDataResult().add("articleId", article.getArticleId());
+        return new JSONDataResult().add("articleId", writing.getWritingId());
     }
 
     /**
@@ -129,9 +129,9 @@ public class ArticleController {
         Article article = articleService.queryArticleDetailById(articleId);
         List<Comment> comments = new ArrayList<>();
         //允许评论时查询评论数据
-        if(article.getComment()) {
-            comments = commentService.queryCommentsWithUser(articleId);
-        }
+//        if(article.getComment()) {
+//            comments = commentService.queryCommentsWithUser(articleId);
+//        }
         return new JSONDataResult().add("article", article).add("comments", comments);
 
     }
@@ -148,7 +148,7 @@ public class ArticleController {
         Date date = new Date();
         Session session = SecurityUtils.getSubject().getSession();
         User user = (User) session.getAttribute(Dict.CURRENT_USER_DATA);
-        article.setUpdater(user.getUserId());
+//        article.setUpdater(user.getUserId());
         article.setUpdateTime(date);
         logger.info(article.toString());
         articleService.updateById(article);

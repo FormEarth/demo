@@ -33,15 +33,15 @@
         = #{articleId}; </select> -->
 
     <!-- 查询文章评论 -->
-    <select id="queryCommentsWithUser" parameterType="long"
+    <select id="queryCommentsWithUser" parameterType="String"
             resultType="com.example.demo.entity.Comment">
 		select c.*,u.user_name,u.avatar, count(r.reply_comment_id)
 		as reply_count from demo_comment c
 		left join `user` u on c.user_id =
 		u.user_id
-		left join reply r on r.reply_comment_id = c.comment_id
+		left join demo_reply r on r.reply_comment_id = c.comment_id
 		where
-		c.article_id = #{articleId}
+		c.writing_id = #{writingId}
 		group by c.comment_id order by reply_count
 		desc,c.comment_time desc;
 	</select>
