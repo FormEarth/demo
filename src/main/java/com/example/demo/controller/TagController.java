@@ -44,16 +44,12 @@ public class TagController {
         return JSONResult.success();
     }
 
-    //TODO
     @RequestMapping(value = "/tags",method = RequestMethod.GET)
     public JSONResult queryAllTags() throws SystemException {
         User currentLoginUser = (User) SecurityUtils.getSubject().getPrincipal();
-//        tag.setTagStatus(Dict.TAG_STATUS_DELETED);
-//        tag.setUpdater(currentLoginUser.getUserId());
         return new JSONDataResult().add("tags",tagServiceImpl.queryAllTagsWithoutPage());
     }
 
-    //TODO
     @RequestMapping(value = "/tags/search",method = RequestMethod.GET)
     public JSONResult queryTagsByKeyword(@RequestParam String searchText) throws SystemException {
         List<Tag> tagList;

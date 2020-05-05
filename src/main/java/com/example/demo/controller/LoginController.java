@@ -67,7 +67,6 @@ public class LoginController {
         try {
             subject.login(usernamePasswordToken);
         } catch (Exception e) {
-            logger.error(e.getMessage());
             if (e instanceof AuthException) {
                 throw new SystemException(((AuthException) e).getExceptionEnums());
             } else {

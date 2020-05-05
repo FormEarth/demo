@@ -3,6 +3,7 @@ package com.example.demo.service.impl;
 import java.util.List;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.example.demo.common.SystemProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,8 +24,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
 
     @Autowired
     UserMapper userMapper;
-    @Value("${image.access.url}")
-    private String accessPref;
+    private String accessPref = SystemProperties.INSTANCE.getInstance().getProperty("image.access.url");
 
     @Override
     public User userLogin(String account, String password) throws SystemException {

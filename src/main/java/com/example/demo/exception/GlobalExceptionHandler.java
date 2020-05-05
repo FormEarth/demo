@@ -2,6 +2,8 @@ package com.example.demo.exception;
 
 import javax.validation.ConstraintViolationException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -26,7 +28,8 @@ import com.example.demo.entity.JSONResult;
 	返回model + @ResponseBody
 */
 public class GlobalExceptionHandler {
-	
+
+	private final static Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 	/**
 	 * 处理自定义的SystemException
 	 * @param ex
@@ -34,6 +37,7 @@ public class GlobalExceptionHandler {
 	 */
     @ExceptionHandler(value = SystemException.class)
 	public JSONResult systemExceptionHandler(SystemException ex){
+//		logger.error(ExceptionUtil.getStackTraceString(ex));
 		ex.printStackTrace();
         return new JSONResult(ex.getExceptionEnums().getCode(),ex.getExceptionEnums().getMessage());
      }
@@ -45,7 +49,7 @@ public class GlobalExceptionHandler {
 	 */
     @ExceptionHandler(value = NoHandlerFoundException.class)
 	public JSONResult noHandlerFoundExceptionHandler(NoHandlerFoundException ex){
-		ex.printStackTrace();
+		logger.error(ExceptionUtil.getStackTraceString(ex));
         return new JSONResult(ExceptionEnums.API_NOT_FOUND);
      }
     
@@ -56,7 +60,7 @@ public class GlobalExceptionHandler {
 	 */
     @ExceptionHandler(value = {ConstraintViolationException.class,MethodArgumentNotValidException.class})
 	public JSONResult constraintViolationExceptionHandler(ConstraintViolationException ex){
-		ex.printStackTrace();
+		logger.error(ExceptionUtil.getStackTraceString(ex));
         return new JSONResult("4444", ex.getMessage());
      }
 	
@@ -67,7 +71,7 @@ public class GlobalExceptionHandler {
 	 */
     @ExceptionHandler(value = RuntimeException.class)
 	public JSONResult exceptionHandler(RuntimeException ex){
-		ex.printStackTrace();
+		logger.error(ExceptionUtil.getStackTraceString(ex));
 //		JSONResult result = new JSONResult();
 //		if(ex instanceof NoHandlerFoundException) {
 //			return result.setEnum(ExceptionEnums.API_NOT_FOUND);
@@ -77,7 +81,7 @@ public class GlobalExceptionHandler {
 //			return result.setEnum(ExceptionEnums.UNKNOWN_ERROR);
 //		}else {
 			//发生异常进行日志记录，写入数据库或者其他处理，此处省略
-	        return new JSONResult(ExceptionEnums.UNKNOWN_ERROR);
+		return new JSONResult(ExceptionEnums.UNKNOWN_ERROR);
 //		}
         
      }

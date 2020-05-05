@@ -1,25 +1,25 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.common.Dict;
+import com.example.demo.common.SequenceNumber;
 import com.example.demo.entity.*;
 import com.example.demo.exception.ExceptionEnums;
 import com.example.demo.exception.SystemException;
 import com.example.demo.mapper.ArticleMapper;
 import com.example.demo.mapper.ArticleTagMapper;
-import com.example.demo.util.MarkdownParser;
+import com.example.demo.util.MarkdownUtil;
 import com.example.demo.util.Util;
 import org.apache.shiro.SecurityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.service.ArticleService;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 
@@ -29,10 +29,10 @@ import java.util.List;
 @Service
 public class ArticleServiceImpl extends BaseServiceImpl<Article> implements ArticleService {
 
-    @Value(value = "${path.blog.hexo}")
-    private String blogPath;
-    @Value(value = "${image.access.url}")
-    private String accessPref;
+    private static final Logger logger = LoggerFactory.getLogger(ArticleServiceImpl.class);
+
+//    private static String blogPath;
+//    private static String accessPref;
     @Value(value = "${static.blog.generate.shell}")
     private String[] shell;
     @Autowired
@@ -46,7 +46,8 @@ public class ArticleServiceImpl extends BaseServiceImpl<Article> implements Arti
     public void articleHandle(Writing article) throws SystemException {
         Date date = new Date();
         User user = (User) SecurityUtils.getSubject().getPrincipal();
-        article.setSummary(MarkdownParser.toText(article.getContent(), 200));
+        article.setWritingId(SequenceNumber.getInstance().getNextSequence(Dict.SEQUENCE_TYPE_WRITING));
+        article.setSummary(MarkdownUtil.toText(article.getContent(), 200));
         article.setCreateTime(date);
         article.setType(Dict.WRITING_TYPE_ARTICLE);
         article.setSendTime(date);
@@ -56,13 +57,12 @@ public class ArticleServiceImpl extends BaseServiceImpl<Article> implements Arti
         mongoTemplate.insert(article);
         if (article.getSaveToFile()) {
             try {
-                writeContentToFile(article);
+                MarkdownUtil.writeContentToFile(article);
             } catch (IOException e) {
-                e.printStackTrace();
                 throw new SystemException(ExceptionEnums.FILE_WRITE_FAIL);
             }
             //调用shell使hexo重新生成静态页面
-            Util.shellExecute(blogPath,shell);
+            Util.shellExecute(shell);
         }
     }
 
@@ -88,36 +88,5 @@ public class ArticleServiceImpl extends BaseServiceImpl<Article> implements Arti
         return article;
     }
 
-    /**
-     * 将文章内容写为md文件
-     * @param article
-     * @throws IOException
-     */
-    private void writeContentToFile(Writing article) throws IOException {
-        LocalDateTime dateTime = LocalDateTime.now();
-        StringBuffer sb = new StringBuffer();
-        sb.append("---\n");
-        sb.append("title: ").append(article.getTitle()).append("\n");
-        sb.append("date: ").append(dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append("\n");
-        //封面全路径
-        sb.append("index_img: ").append(accessPref).append(article.getFrontCover()).append("\n");
-        sb.append("banner_img: ").append(accessPref).append(article.getFrontCover()).append("\n");
-        List<Tag> tags = article.getTags();
-        if (tags != null && tags.size() > 0) {
-            sb.append("tags:\n");
-            for (Tag tag : tags) {
-                sb.append("- ").append(tag.getTagText()).append("\n");
-            }
-        }
-        sb.append("---\n");
-        sb.append("\n");
-        sb.append(article.getContent());
 
-        File file = new File(blogPath + "/source/_posts/" + dateTime.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) + ".md");
-
-        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
-        bufferedWriter.write(sb.toString());
-        bufferedWriter.flush();
-        bufferedWriter.close();
-    }
 }

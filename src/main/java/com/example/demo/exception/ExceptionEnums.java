@@ -63,6 +63,8 @@ public enum ExceptionEnums {
 	SAME_PASSWORD_ERROR("1114","新旧密码相同"),
 	/** 图片处理失败 */
 	IMAGE_HANDLE_ERROR("1115","图片处理失败"),
+	/** 内部数据处理错误 */
+	DATA_HANDLE_ERROR("1116","内部数据处理错误"),
 	/** 默认的成功 */
 	DEFAULT_SUCCESS("2000","请求成功"),
 	/** 服务器异常 */

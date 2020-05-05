@@ -4,8 +4,11 @@ import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
+import com.drew.metadata.Tag;
 import com.drew.metadata.exif.ExifIFD0Directory;
+import com.example.demo.exception.ExceptionEnums;
 import com.example.demo.exception.SystemException;
+import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
@@ -17,6 +20,7 @@ import java.awt.RenderingHints;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -82,8 +86,8 @@ public class ImageUtil {
 		// 获取真实宽度
 		float realWidth = getRealFontWidth(text);
 		float fontSize = font.getSize();
-		System.out.println("----------------"+realWidth+","+fontSize);
-		System.out.println("----------------y:"+(width-realWidth));
+//		System.out.println("----------------"+realWidth+","+fontSize);
+//		System.out.println("----------------y:"+(width-realWidth));
 		// 计算绘图偏移x、y，使得使得水印文字在图片中居中
 		// 这里需要理解x、y坐标是基于Graphics2D.rotate过后的坐标系
 //		float x = 0.5f * width - 0.5f * fontSize * realWidth;
@@ -122,6 +126,8 @@ public class ImageUtil {
 		return waterMarkByText(200, 50, text);
 	}
 
+
+
 	/**
 	 * 获取真实字符串宽度，ascii字符占用0.5，中文字符占用1.0
 	 */
@@ -139,12 +145,23 @@ public class ImageUtil {
 	}
 
 	public static String getOrientation(MultipartFile file) throws SystemException {
+		BufferedImage bi;
+		try {
+			 bi = ImageIO.read(file.getInputStream());
+		} catch (IOException e) {
+			throw new SystemException(ExceptionEnums.IMAGE_HANDLE_ERROR);
+		}
+		BigDecimal width = new BigDecimal(bi.getWidth());
+		BigDecimal height = new BigDecimal(bi.getHeight());
+		if(width.compareTo(height)!=0){
+			return null;
+		}
 		Metadata metadata;
 		String orientation = null;
 		try {
 			metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(file.getInputStream()),false);
 		} catch (ImageProcessingException | IOException e) {
-			e.printStackTrace();
+			//若是读取exif信息失败则不再处理
 //			throw new SystemException(ExceptionEnums.IMAGE_HANDLE_ERROR);
 			return null;
 		}
@@ -153,5 +170,23 @@ public class ImageUtil {
 			orientation = directory.getString(ExifIFD0Directory.TAG_ORIENTATION);
 		}
 		return orientation;
+	}
+
+	public static void main(String[] args) throws ImageProcessingException, IOException {
+//		String str = "C:/Users/chunyangwang/Desktop/test/aaa.jpg";
+		File file = new File("C:/Users/chunyangwang/Desktop/test/aaa.jpg");
+		Metadata metadata = ImageMetadataReader.readMetadata(file);
+		String orientation = "";
+		for(Directory directory : metadata.getDirectories()){
+			for (Tag tag : directory.getTags()) {
+				System.out.format("[%s] - %s = %s\n",
+						directory.getName(), tag.getTagName(), tag.getDescription());
+			}
+			orientation = directory.getString(ExifIFD0Directory.TAG_ORIENTATION);
+		}
+//		if(orientation.equals("3")){
+			Thumbnails.of(file).scale(1.0).rotate(0).toFile("C:/Users/chunyangwang/Desktop/test/aaa_2.jpg");
+//		}
+		System.out.println(orientation);
 	}
 }

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import com.baomidou.mybatisplus.core.toolkit.SerializationUtils;
+import com.example.demo.common.SystemProperties;
 import com.example.demo.util.Util;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -26,7 +27,7 @@ import com.example.demo.exception.ExceptionEnums;
 import com.example.demo.exception.SystemException;
 
 /**
- * 添加@StaticURL注解的方法，若返回值不为空，会为其加上配置的访问路径前缀
+ * 注解@StaticURL的切面处理类
  *
  * @author raining_heavily
  * @date 2019年10月23日
@@ -38,23 +39,25 @@ public class StaticURLAspect {
 
     private static final Logger logger = LoggerFactory.getLogger(StaticURLAspect.class);
 
-    @Value("${image.access.url}")
-    private String accessPref;
+    private String accessPref = SystemProperties.INSTANCE.getInstance().getProperty("image.access.url");
 
     @Pointcut("@annotation(com.example.demo.aop.annotation.StaticURL)")
     public void pointcut() {
     }
 
+    /**
+     * 拦截标记了StaticURL的方法，遍历方法的返回数据，将标记StaticURL注解的属性添加上访问路径
+     * @param joinPoint
+     * @return
+     * @throws Throwable
+     */
     @Around("pointcut()")
     public Object advice(ProceedingJoinPoint joinPoint) throws Throwable {
-        logger.info("执行了StaticURL切面");
-
-        JSONDataResult jResult = new JSONDataResult();
-        Object proceed = null;
+        JSONDataResult jResult;
+        Object proceed;
         try {
             proceed = joinPoint.proceed();
         } catch (Throwable e) {
-            e.printStackTrace();
             logger.error("执行目标方法就出错了啊,不再执行切面，完事了…………………………");
             throw e;
         }
@@ -104,8 +107,6 @@ public class StaticURLAspect {
      * @return
      */
     private Object handleEntity(Object object) throws SystemException {
-//        Object newObject;
-        //TODO 这个地方有个bug，shiro中维护了一个user，修改它是会修改它维护的那个
         Class<? extends Object> clazz = object.getClass();
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
@@ -139,7 +140,6 @@ public class StaticURLAspect {
                         }
                     } catch (Exception e) {
                         logger.error("切面数据处理异常！！！");
-                        e.printStackTrace();
                         throw new SystemException(ExceptionEnums.DEFAULT_FAIL);
                     }
                 }
@@ -170,12 +170,12 @@ public class StaticURLAspect {
 
     @AfterThrowing(value = "@annotation(com.example.demo.aop.annotation.StaticURL)", throwing = "ex")
     public void doThrow(JoinPoint joinPoint, Exception ex) throws Exception {
-        logger.error("出错啦啦啦啦-----------------");
-        if (ex instanceof SystemException) {
-            logger.error("是SystemException啊");
-            throw ex;
-        } else {
-            throw new SystemException(ExceptionEnums.UNKNOWN_ERROR);
-        }
+        logger.error("some exception appear in the aspect");
+//        if (ex instanceof SystemException) {
+//            logger.error("是SystemException啊");
+//            throw ex;
+//        } else {
+//            throw new SystemException(ExceptionEnums.UNKNOWN_ERROR);
+//        }
     }
 }

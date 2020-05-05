@@ -1,11 +1,12 @@
 package com.example.demo.util;
 
 import com.example.demo.common.Dict;
+import com.example.demo.common.SystemProperties;
 import com.example.demo.entity.User;
 import com.example.demo.exception.ExceptionEnums;
+import com.example.demo.exception.ExceptionUtil;
 import com.example.demo.exception.SystemException;
 import org.apache.shiro.crypto.hash.Md5Hash;
-import org.apache.shiro.crypto.hash.SimpleHash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.DigestUtils;
@@ -182,23 +183,23 @@ public class Util {
     /**
      * 在指定路径上执行shell命令
      *
-     * @param path     路径，eg. C:/Users/chunyangwang/Desktop
      * @param commands 命令（多条）， eg.<br>
      *                 windows: "cmd", "/c", "hexo generate"<br>
      *                 Linux: "sh", "/c", "hexo generate"
      * @return
      * @throws SystemException
      */
-    public static boolean shellExecute(String path, String... commands) throws SystemException {
+    public static boolean shellExecute( String... commands) throws SystemException {
         ProcessBuilder processBuilder = new ProcessBuilder(commands);
         //使用cd无法切换目录，指定命令执行路径
+        String path = SystemProperties.INSTANCE.getInstance().getProperty("path.blog.hexo");
         File file = new File(path);
         processBuilder.directory(file);
         Process p;
         try {
             p = processBuilder.start();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(ExceptionUtil.getStackTraceString(e));
             logger.error("execute command " + Arrays.asList(commands) + "failed!");
             throw new SystemException(ExceptionEnums.COMMAND_EXECUTE_FAILED);
         }
@@ -210,14 +211,13 @@ public class Util {
         } catch (UnsupportedEncodingException e) {
             logger.error("this error will never appear!");
         }
-//        BufferedReader bs = new BufferedReader(new InputStreamReader(in));
         //阻塞一直到命令执行完毕
         try {
-            //TODO 指定阻塞时间，不然会一直在这
+            //指定阻塞时间，不然会一直在这
             p.waitFor(2, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            e.printStackTrace();
             logger.error("waitFor fail!");
+            logger.error(ExceptionUtil.getStackTraceString(e));
             throw new SystemException(ExceptionEnums.COMMAND_EXECUTE_FAILED);
         }
         StringBuffer buffer = new StringBuffer();
@@ -226,7 +226,6 @@ public class Util {
                 buffer.append(bs.readLine()).append("\n");
             }
         } catch (IOException e) {
-            e.printStackTrace();
             logger.error("read result failed!");
             throw new SystemException(ExceptionEnums.COMMAND_EXECUTE_FAILED);
         }
@@ -309,7 +308,8 @@ public class Util {
 //        System.out.println(l.compareTo(-1L));
 //        System.out.println(l.equals(-1));
 //        shellExecute("D:/gitbox/hexo-blog/","cmd","/c","hexo generate");
-        readFormFile();
+//        readFormFile();
+        System.out.println(getLocalRealIP());
     }
 
 }

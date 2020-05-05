@@ -68,7 +68,10 @@ public class TagServiceImpl extends BaseServiceImpl<Tag> implements TagService {
     @Override
     public void handleTagList(List<Tag> tags, boolean create) {
         User currentLoginUser = (User) SecurityUtils.getSubject().getPrincipal();
-        if (tags == null || tags.size() < 1) return;
+        if (tags == null || tags.size() < 1) {
+            tags = new ArrayList<>();
+            return;
+        }
         for (Tag temp : tags) {
             if (temp.getTagId().compareTo(-1L) == 0) {
                 //插入

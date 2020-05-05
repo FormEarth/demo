@@ -89,7 +89,6 @@ public class ShiroRealm extends AuthorizingRealm {
         try {
             user = userService.getOne(new QueryWrapper<User>().eq("account", username));
         } catch (Exception e) {
-            logger.error(e.getMessage());
             throw new AuthException(ExceptionEnums.LOGIN_FAIL);
         }
 

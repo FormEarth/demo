@@ -8,7 +8,15 @@ import java.util.Map;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
+import com.example.demo.common.Dict;
+import com.example.demo.common.SequenceNumber;
+import com.example.demo.entity.*;
+import com.example.demo.exception.SystemException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,15 +26,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import com.example.demo.entity.JSONDataResult;
-import com.example.demo.entity.JSONResult;
-import com.example.demo.entity.Permission;
-import com.example.demo.entity.Role;
 import com.example.demo.service.PermissionService;
 import com.example.demo.service.RoleService;
 
 @RestController
-@RequestMapping(value="/api/test")
 public class TestController {
 	
 	@Autowired
@@ -34,6 +37,9 @@ public class TestController {
 	
 	@Autowired
     private TemplateEngine templateEngine;
+
+	@Autowired
+	MongoTemplate mongoTemplate;
 	
 	@Autowired
 	RoleService roleService;
@@ -41,18 +47,30 @@ public class TestController {
 	@Autowired
 	PermissionService permissionService;
 
+	@RequestMapping(value = "/ttest", method = RequestMethod.GET)
+	public JSONResult modify() {
+		List<Writing> atlases = mongoTemplate.findAll(Writing.class);
+		for (Writing atlas : atlases) {
+			if(atlas.getTags()==null){
+				Query query = new Query();
+				query.addCriteria(Criteria.where("_id").is(atlas.getWritingId()));
+				mongoTemplate.updateFirst(query, new Update().set("tags", new ArrayList<>()), Writing.class);
+			}
+
+		}
+
+		return JSONDataResult.success();
+	}
+
 	/**
 	 * 测试接口
 	 * @return
 	 */
 	@RequestMapping(value="/test",method=RequestMethod.GET)
-	public JSONResult test() {
-		String age = "123";
-		List<String> list = new ArrayList<>();
-		list.add("1111111");
-		list.add("2222222");
-		list.add("3333333");
-		return new JSONDataResult().add("age", age).add("list", list);
+	public JSONResult test() throws SystemException {
+		String image = SequenceNumber.getInstance().getNextSequence(Dict.SEQUENCE_TYPE_IMAGE);
+		String writing = SequenceNumber.getInstance().getNextSequence(Dict.SEQUENCE_TYPE_WRITING);
+		return new JSONDataResult().add("image_id", image).add("writing_id",writing);
 	}
 	
 	/**

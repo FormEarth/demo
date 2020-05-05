@@ -3,6 +3,9 @@ package com.example.demo.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.demo.exception.ExceptionUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -21,6 +24,8 @@ import org.springframework.dao.DuplicateKeyException;
  */
 public class BaseServiceImpl<E> implements BaseService<E>{
 
+    private static final Logger logger = LoggerFactory.getLogger(BaseServiceImpl.class);
+
     @Autowired
     BaseMapper<E> baseMapper;
 
@@ -30,7 +35,7 @@ public class BaseServiceImpl<E> implements BaseService<E>{
         try {
             i = baseMapper.insert(entity);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(ExceptionUtil.getStackTraceString(e));
             if(e instanceof DuplicateKeyException){
                 throw new SystemException(ExceptionEnums.SQL_DUPLICATE_ENTRY);
             }
@@ -46,7 +51,7 @@ public class BaseServiceImpl<E> implements BaseService<E>{
         try {
             i = baseMapper.delete(queryWrapper);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(ExceptionUtil.getStackTraceString(e));
             throw new SystemException(ExceptionEnums.DATA_DELETE_FAIL);
         }
         if(i < 1) throw new SystemException(ExceptionEnums.DATA_DELETE_FAIL);
@@ -59,7 +64,6 @@ public class BaseServiceImpl<E> implements BaseService<E>{
         try {
             entity = baseMapper.selectOne(queryWrapper);
         } catch (Exception e) {
-            e.printStackTrace();
             throw new SystemException(ExceptionEnums.DATA_SELECT_FAIL);
         }
         return entity;
@@ -71,7 +75,6 @@ public class BaseServiceImpl<E> implements BaseService<E>{
         try {
             entity = baseMapper.selectById(id);
         } catch (Exception e) {
-            e.printStackTrace();
             throw new SystemException(ExceptionEnums.DATA_SELECT_FAIL);
         }
         if(entity==null) throw new SystemException(ExceptionEnums.DATA_SELECT_FAIL);
@@ -84,7 +87,6 @@ public class BaseServiceImpl<E> implements BaseService<E>{
         try {
             list = baseMapper.selectPage(page, queryWrapper).getRecords();
         } catch (Exception e) {
-            e.printStackTrace();
             throw new SystemException(ExceptionEnums.DATA_SELECT_FAIL);
         }
         return list;
@@ -96,7 +98,6 @@ public class BaseServiceImpl<E> implements BaseService<E>{
         try {
             i = baseMapper.update(entity, queryWrapper);
         } catch (Exception e) {
-            e.printStackTrace();
             throw new SystemException(ExceptionEnums.DATA_UPDATE_FAIL);
         }
         return i;
@@ -108,7 +109,6 @@ public class BaseServiceImpl<E> implements BaseService<E>{
         try {
             i= baseMapper.updateById(entity);
         } catch (Exception e) {
-            e.printStackTrace();
             throw new SystemException(ExceptionEnums.DATA_UPDATE_FAIL);
         }
         return i;
@@ -120,7 +120,6 @@ public class BaseServiceImpl<E> implements BaseService<E>{
         try {
             i = baseMapper.selectCount(queryWrapper);
         } catch (Exception e) {
-            e.printStackTrace();
             throw new SystemException(ExceptionEnums.DATA_SELECT_FAIL);
         }
         return i;

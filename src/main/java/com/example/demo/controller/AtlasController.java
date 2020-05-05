@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.aop.annotation.StaticURL;
 import com.example.demo.common.Dict;
 import com.example.demo.common.FileSourceEnum;
+import com.example.demo.common.SequenceNumber;
 import com.example.demo.entity.*;
 import com.example.demo.exception.ExceptionEnums;
 import com.example.demo.exception.SystemException;
@@ -10,14 +11,12 @@ import com.example.demo.service.CommentService;
 import com.example.demo.service.ImageService;
 import com.example.demo.service.TagService;
 import com.example.demo.service.UserService;
-import com.example.demo.util.Util;
 import com.mongodb.client.result.UpdateResult;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.util.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -56,8 +55,6 @@ public class AtlasController {
     TagService tagService;
     @Autowired
     CommentService commentService;
-    @Value("${image.access.url}")
-    private String accessPref;
 
     /**
      * 创建图集
@@ -80,7 +77,6 @@ public class AtlasController {
         logger.info("图片数量:" + files.length + ",图片相对路径：" + imageList);
         Date nowDate = new Date();
         writing.setAtlasPictures(imageList);
-//        writing.setIdentical(Util.checkImagesProportion(files));
         User currentLoginUser = (User) SecurityUtils.getSubject().getPrincipal();
         //处理标签，新建或者更新
         List<Tag> tagList = writing.getTags();
@@ -90,6 +86,7 @@ public class AtlasController {
             //空时添加空list
             writing.setTags(new ArrayList<>());
         }
+        writing.setWritingId(SequenceNumber.getInstance().getNextSequence(Dict.SEQUENCE_TYPE_WRITING));
         writing.setType(Dict.WRITING_TYPE_ATLAS);
         writing.setStatus(Dict.WRITING_STATUS_NORMAL);
         writing.setCreatorId(currentLoginUser.getUserId());
@@ -162,7 +159,7 @@ public class AtlasController {
      * @param lastRefreshTime
      * @return
      * @throws SystemException
-     * @deprecated
+     * @deprecated 该接口暂时没有使用
      */
     @StaticURL
     @RequestMapping(value = "/atlases/refresh/{lastRefreshTime}", method = RequestMethod.GET)
@@ -193,10 +190,12 @@ public class AtlasController {
 
     /**
      * 根据作品id删除作品
+     * TODO 删除图片文件
      *
      * @param writingId
      * @return
      * @throws SystemException
+     * @deprecated 已废弃
      */
     @RequestMapping(value = "/atlas/{writingId}", method = RequestMethod.DELETE)
     public JSONResult removeAtlasByAtlasId(@PathVariable String writingId) throws SystemException {
@@ -213,7 +212,7 @@ public class AtlasController {
 
     /**
      * 图集编辑<br>
-     * 不允许图片修改
+     * tip:不允许图片修改
      *
      * @param
      * @return
@@ -222,9 +221,7 @@ public class AtlasController {
     @RequestMapping(value = "/atlas", method = RequestMethod.PUT)
     public JSONResult modifyAtlas(@RequestBody Writing writing) throws SystemException {
         User currentLoginUser = (User) SecurityUtils.getSubject().getPrincipal();
-        if (writing.getTags() != null) {
-            tagService.handleTagList(writing.getTags(), false);
-        }
+        tagService.handleTagList(writing.getTags(), false);
         Query query = new Query().addCriteria(Criteria.where("_id").is(writing.getWritingId())).addCriteria(Criteria.where("creatorId").is(currentLoginUser.getUserId()));
         //向数组末尾增加元素
         Update update = new Update().set("content", writing.getContent())
@@ -242,17 +239,5 @@ public class AtlasController {
         return JSONDataResult.success();
     }
 
-    public JSONResult modify() {
-        List<Atlas> atlases = mongoTemplate.findAll(Atlas.class);
-        for (Atlas atlas : atlases) {
-            List<String> list = new ArrayList<>();
-            list.add(atlas.getAtlasContent().toString());
-            Query query = new Query();
-            query.addCriteria(Criteria.where("_id").is(atlas.getAtlasId()));
-            mongoTemplate.updateFirst(query, new Update().set("atlasContent", list), Atlas.class);
-        }
-
-        return JSONDataResult.success();
-    }
 
 }

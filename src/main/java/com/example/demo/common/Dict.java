@@ -51,4 +51,8 @@ public class Dict {
 	public static final int WRITING_TYPE_ARTICLE = 1;
 	/** 图集 **/
 	public static final int WRITING_TYPE_ATLAS = 2;
+	/** 作品 **/
+	public static final String SEQUENCE_TYPE_WRITING = "W";
+	/** 图片 **/
+	public static final String  SEQUENCE_TYPE_IMAGE = "I";
 }

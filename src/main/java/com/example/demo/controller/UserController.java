@@ -10,6 +10,7 @@ import com.example.demo.entity.JSONDataResult;
 import com.example.demo.entity.JSONResult;
 import com.example.demo.entity.User;
 import com.example.demo.exception.ExceptionEnums;
+import com.example.demo.exception.ExceptionUtil;
 import com.example.demo.exception.SystemException;
 import com.example.demo.service.ImageService;
 import com.example.demo.service.CollectionService;
@@ -207,8 +208,8 @@ public class UserController {
         try {
             subject.logout();
         } catch (AuthenticationException e) {
-            logger.info(user.getAccount() + "登出失败！");
-            e.printStackTrace();
+            logger.error(user.getUserId() + "登出失败！");
+            logger.error(ExceptionUtil.getStackTraceString(e));
             throw new SystemException(ExceptionEnums.LOGOUT_FAIL);
         }
         return JSONResult.success();

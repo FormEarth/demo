@@ -35,7 +35,7 @@ public class LoginInterceptor implements HandlerInterceptor {
             return true;
         }
         User currentLoginUser = (User) SecurityUtils.getSubject().getPrincipal();
-        logger.info("当前用户：{}" , currentLoginUser);
+//        logger.info("当前用户：{}" , currentLoginUser);
         if (currentLoginUser == null) {
             throw new SystemException(ExceptionEnums.USER_NOT_LOGIN);
         } else {

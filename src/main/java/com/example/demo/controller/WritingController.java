@@ -1,13 +1,13 @@
 package com.example.demo.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.demo.aop.annotation.StaticURL;
 import com.example.demo.common.Dict;
-import com.example.demo.entity.*;
+import com.example.demo.entity.JSONDataResult;
+import com.example.demo.entity.JSONResult;
+import com.example.demo.entity.User;
+import com.example.demo.entity.Writing;
 import com.example.demo.exception.ExceptionEnums;
 import com.example.demo.exception.SystemException;
-import com.example.demo.service.ArticleService;
 import com.example.demo.service.UserService;
 import com.mongodb.client.result.UpdateResult;
 import org.apache.shiro.SecurityUtils;
@@ -22,7 +22,6 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Random;
 
 /**
  * @author raining_heavily
@@ -131,7 +130,7 @@ public class WritingController {
 
     /**
      * 删除指定作品
-     *
+     * //TODO 同时删除图片
      * @param writingId
      * @return
      * @throws SystemException
@@ -142,6 +141,7 @@ public class WritingController {
         Query query = new Query();
         query.addCriteria(Criteria.where("_id").is(writingId));
         query.addCriteria(Criteria.where("creatorId").is(currentLoginUser.getUserId()));
+        //更新状态
         UpdateResult result = mongoTemplate.updateFirst(query, new Update().set("status", Dict.WRITING_STATUS_DELETED), "atlas");
         if (result.getModifiedCount() < 1) {
             logger.error("{} delete {} failed!",currentLoginUser.getUserId(),writingId);
@@ -150,50 +150,7 @@ public class WritingController {
         return JSONDataResult.success();
     }
 
-    @RequestMapping(value = "/export", method = RequestMethod.GET)
-    public JSONResult export(){
-        List<Atlas> atlases = mongoTemplate.findAll(Atlas.class);
-        for (Atlas atlas : atlases) {
 
-            Writing writing = new Writing();
-            writing.setType(2);
-            writing.setPageview((long) new Random().nextInt(10));
-            writing.setWritingId(atlas.getAtlasId());
-            writing.setStatus(atlas.getAtlasStatus());
-            writing.setAtlasPictures(atlas.getAtlasPictures());
-            writing.setTags(atlas.getAtlasTags());
-            writing.setComment(atlas.getComment());
-            writing.setPersonal(atlas.getPersonal());
-            writing.setContent(atlas.getAtlasContent().get(atlas.getAtlasContent().size()-1));
-            writing.setCreatorId(atlas.getCreater());
-            writing.setSendTime(atlas.getSendTime());
-            mongoTemplate.insert(writing);
-        }
-        return JSONDataResult.success();
-    }
 
-    @Autowired
-    ArticleService articleService;
-    @RequestMapping(value = "/export_mysql", method = RequestMethod.GET)
-    public JSONResult exportMysql2Mongo() {
-        List<Article> articles = articleService.queryArticleInHome(1);
-        for (Article article : articles) {
-            Writing writing = new Writing();
-            writing.setType(1);
-            writing.setStatus(article.getStatus());
-            writing.setFrontCover(article.getFrontCover());
-            writing.setTitle(article.getTitle());
-            writing.setSummary(article.getSummary());
-            writing.setTags(article.getTags());
-            writing.setComment(article.getComment());
-            writing.setPersonal(article.getPersonal());
-            writing.setContent(article.getContent());
-            writing.setCreatorId(article.getAuthor());
-            writing.setSendTime(article.getSendTime());
-            writing.setPageview(article.getReaderNum());
-            mongoTemplate.insert(writing);
-        }
-        return JSONDataResult.success();
-    }
 
 }

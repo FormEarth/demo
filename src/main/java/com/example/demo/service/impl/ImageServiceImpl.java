@@ -116,14 +116,14 @@ public class ImageServiceImpl implements ImageService {
 
         // 压缩和添加水印
         try {
-            Thumbnails.Builder<? extends InputStream> builder = Thumbnails.of(image.getInputStream());
+            Thumbnails.Builder<? extends InputStream> builder = Thumbnails.of(image.getInputStream()).rotate(angles);
             if (addWatermark) {
                 builder = builder.watermark(Positions.BOTTOM_RIGHT, ImageUtil.waterMarkByText(watermark), 0.8f);
             }
-            builder.outputQuality(0.25f).rotate(angles).scale(1f).toFile(outFile);
+            builder.outputQuality(0.25f).scale(1f).toFile(outFile);
         } catch (Exception ex) {
+            logger.error(ex.getMessage());
             logger.error(ExceptionEnums.IMAGE_FILE_COMPRESSION_FAIL.getMessage());
-            ex.printStackTrace();
             throw new SystemException(ExceptionEnums.IMAGE_FILE_UPLOAD_FAIL);
         }
 

@@ -34,13 +34,13 @@ public class ApiController {
 	}
 	
 	@Autowired
-	ImageService apiService;
+	ImageService imageService;
 
 	@StaticURL
 	@RequestMapping(value="/image",method=RequestMethod.POST)
 	public JSONResult imageUpload(@RequestParam("image") MultipartFile file) throws SystemException {
 		
-		String relativePath = apiService.singleImageUpload(file, Dict.GLOBAL_WATERMARK, FileSourceEnum.ARTICLE);
+		String relativePath = imageService.singleImageUpload(file, Dict.GLOBAL_WATERMARK, FileSourceEnum.ARTICLE);
 		return new JSONDataResult().add("relativePath", relativePath);
 	}
 }
