@@ -64,7 +64,7 @@ public class ImageServiceImpl implements ImageService {
     @Override
     public String saveOriginImage(MultipartFile file, FileSourceEnum source) throws SystemException {
         String fileName = getuuid() + ".jpg";
-        saveFileToPath(file, compPath + source.getDynamic() + fileName,0);
+        saveFileToPath(file, compPath + source.getDynamic() + fileName);
         return source.getDynamic() + fileName;
     }
 
@@ -88,25 +88,16 @@ public class ImageServiceImpl implements ImageService {
         logger.info("压缩图片路径：" + thumbnailFilePath);
 
         //修正图片带有旋转的情况
-        String orientation = ImageUtil.getOrientation(image);
-        double angles = 0;
-
-        if ("3".equals(orientation)) {
-            angles = 180;
-        } else if ("6".equals(orientation)) {
-            angles = 90;
-        } else if ("8".equals(orientation)) {
-            angles = -90;
-        }
-        logger.info("图片旋转{},角度{}",orientation,angles);
+        double angles =  ImageUtil.getOrientation(image);
+        logger.info("图片旋转角度{}",angles);
 
         if (GIF.equals(fileType)) {
             fileName = uuid + ".gif";
             relativePath = source.getDynamic() + fileName;
-            saveFileToPath(image, compPath + relativePath,angles);
+            saveFileToPath(image, compPath + relativePath);
             return relativePath;
         } else {
-            saveFileToPath(image, filePath,angles);
+            saveFileToPath(image, filePath);
         }
 
         File outFile = new File(thumbnailFilePath);
@@ -116,11 +107,12 @@ public class ImageServiceImpl implements ImageService {
 
         // 压缩和添加水印
         try {
-            Thumbnails.Builder<? extends InputStream> builder = Thumbnails.of(image.getInputStream()).rotate(angles);
+            Thumbnails.Builder<? extends InputStream> builder = Thumbnails.of(image.getInputStream());
             if (addWatermark) {
                 builder = builder.watermark(Positions.BOTTOM_RIGHT, ImageUtil.waterMarkByText(watermark), 0.8f);
             }
-            builder.outputQuality(0.25f).scale(1f).toFile(outFile);
+            //Thumbnails自动处理Exif里的Orientation不准确，这里读取Orientation来旋转
+            builder.useExifOrientation(false).outputQuality(0.25f).scale(1f).rotate(angles).toFile(outFile);
         } catch (Exception ex) {
             logger.error(ex.getMessage());
             logger.error(ExceptionEnums.IMAGE_FILE_COMPRESSION_FAIL.getMessage());
@@ -133,18 +125,18 @@ public class ImageServiceImpl implements ImageService {
     /**
      * 保存源文件到指定路径
      *
-     * @param file
-     * @param path
+     * @param file 文件
+     * @param path 路径
      * @throws SystemException
      */
-    private void saveFileToPath(MultipartFile file, String path,double angles) throws SystemException {
+    private void saveFileToPath(MultipartFile file, String path) throws SystemException {
         File imageFile = new File(path);
         if (imageFile.getParentFile() != null || !imageFile.getParentFile().isDirectory()) {
             // 创建文件
             imageFile.getParentFile().mkdirs();
         }
-        InputStream inputStream = null;
-        FileOutputStream fileOutputStream = null;
+        InputStream inputStream;
+        FileOutputStream fileOutputStream;
 
         try {
             inputStream = file.getInputStream();
