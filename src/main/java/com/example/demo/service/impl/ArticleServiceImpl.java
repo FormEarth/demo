@@ -2,6 +2,7 @@ package com.example.demo.service.impl;
 
 import com.example.demo.common.Dict;
 import com.example.demo.common.SequenceNumber;
+import com.example.demo.common.SystemProperties;
 import com.example.demo.entity.*;
 import com.example.demo.exception.ExceptionEnums;
 import com.example.demo.exception.SystemException;
@@ -20,6 +21,8 @@ import org.springframework.stereotype.Service;
 import com.example.demo.service.ArticleService;
 
 import java.io.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 
@@ -31,8 +34,8 @@ public class ArticleServiceImpl extends BaseServiceImpl<Article> implements Arti
 
     private static final Logger logger = LoggerFactory.getLogger(ArticleServiceImpl.class);
 
-//    private static String blogPath;
-//    private static String accessPref;
+    @Value(value = "${path.blog.hexo}")
+    private static String blogPath;
     @Value(value = "${static.blog.generate.shell}")
     private String[] shell;
     @Autowired
@@ -57,7 +60,7 @@ public class ArticleServiceImpl extends BaseServiceImpl<Article> implements Arti
         mongoTemplate.insert(article);
         if (article.getSaveToFile()) {
             try {
-                MarkdownUtil.writeContentToFile(article);
+                this.writeContentToFile(article);
             } catch (IOException e) {
                 throw new SystemException(ExceptionEnums.FILE_WRITE_FAIL);
             }
@@ -86,6 +89,40 @@ public class ArticleServiceImpl extends BaseServiceImpl<Article> implements Arti
             articleMapper.updateById(article1);
         }
         return article;
+    }
+
+    /**
+     * 将文章内容写为md文件
+     * @param article
+     * @throws IOException
+     */
+    public void writeContentToFile(Writing article) throws IOException {
+        String accessPref = SystemProperties.INSTANCE.getInstance().getProperty("image.access.url");
+        LocalDateTime dateTime = LocalDateTime.now();
+        StringBuffer sb = new StringBuffer();
+        sb.append("---\n");
+        sb.append("title: ").append(article.getTitle()).append("\n");
+        sb.append("date: ").append(dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))).append("\n");
+        //封面全路径
+        sb.append("index_img: ").append(accessPref).append(article.getFrontCover()).append("\n");
+        sb.append("banner_img: ").append(accessPref).append(article.getFrontCover()).append("\n");
+        List<Tag> tags = article.getTags();
+        if (tags != null && tags.size() > 0) {
+            sb.append("tags:\n");
+            for (Tag tag : tags) {
+                sb.append("- ").append(tag.getTagText()).append("\n");
+            }
+        }
+        sb.append("---\n");
+        sb.append("\n");
+        sb.append(article.getContent());
+
+        File file = new File(blogPath + "/source/_posts/" + article.getWritingId() + ".md");
+
+        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
+        bufferedWriter.write(sb.toString());
+        bufferedWriter.flush();
+        bufferedWriter.close();
     }
 
 

@@ -2,7 +2,6 @@ package com.example.demo.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.demo.aop.annotation.StaticURL;
-import com.example.demo.common.CollectionTypeEnum;
 import com.example.demo.common.Dict;
 import com.example.demo.common.FileSourceEnum;
 import com.example.demo.entity.Collection;
@@ -147,9 +146,8 @@ public class UserController {
      * @return
      */
     @RequestMapping(value = "/collection", method = RequestMethod.DELETE)
-    public JSONResult userRemoveCollection(@RequestParam CollectionTypeEnum collectionType, @RequestParam String collectionId) throws SystemException {
+    public JSONResult userRemoveCollection(@RequestParam int collectionType, @RequestParam String collectionId) throws SystemException {
         User currentLoginUser = (User) SecurityUtils.getSubject().getPrincipal();
-        //因为该表没有主键，因此使用查询方式删除
         QueryWrapper<Collection> queryWrapper = new QueryWrapper<>();
         queryWrapper
                 .eq("user_id", currentLoginUser.getUserId())

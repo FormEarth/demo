@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.TextIndexed;
 
 import java.util.Date;
 import java.util.List;
@@ -37,6 +38,7 @@ public class Writing {
     /** 文章是否生成md文件 **/
     private Boolean saveToFile;
     /** 内容 **/
+    @TextIndexed
     private String content;
     /** 私人作品 **/
     private Boolean personal;

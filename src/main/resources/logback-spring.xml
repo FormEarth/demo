@@ -41,7 +41,6 @@
 
     <!-- 日志输出级别 -->
     <root level="INFO">
-        <appender-ref ref="CONSOLE" />
-<!--        <appender-ref ref="FILE" />-->
+        <appender-ref ref="FILE" />
     </root>
 </configuration>

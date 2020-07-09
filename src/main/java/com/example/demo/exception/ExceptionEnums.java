@@ -67,6 +67,8 @@ public enum ExceptionEnums {
 	DATA_HANDLE_ERROR("1116","内部数据处理错误"),
 	/** 默认的成功 */
 	DEFAULT_SUCCESS("2000","请求成功"),
+	/** 服务拒绝 */
+	SERVER_REFUSE("3000","服务拒绝"),
 	/** 服务器异常 */
 	DEFAULT_FAIL("5000","服务器异常");
 	

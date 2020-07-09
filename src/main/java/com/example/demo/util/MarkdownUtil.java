@@ -50,38 +50,5 @@ public class MarkdownUtil {
         return text;
     }
 
-    /**
-     * 将文章内容写为md文件
-     * @param article
-     * @throws IOException
-     */
-    public static void writeContentToFile(Writing article) throws IOException {
-        String accessPref = SystemProperties.INSTANCE.getInstance().getProperty("image.access.url");
-        String blogPath = SystemProperties.INSTANCE.getInstance().getProperty("path.blog.hexo");
-        LocalDateTime dateTime = LocalDateTime.now();
-        StringBuffer sb = new StringBuffer();
-        sb.append("---\n");
-        sb.append("title: ").append(article.getTitle()).append("\n");
-        sb.append("date: ").append(dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))).append("\n");
-        //封面全路径
-        sb.append("index_img: ").append(accessPref).append(article.getFrontCover()).append("\n");
-        sb.append("banner_img: ").append(accessPref).append(article.getFrontCover()).append("\n");
-        List<Tag> tags = article.getTags();
-        if (tags != null && tags.size() > 0) {
-            sb.append("tags:\n");
-            for (Tag tag : tags) {
-                sb.append("- ").append(tag.getTagText()).append("\n");
-            }
-        }
-        sb.append("---\n");
-        sb.append("\n");
-        sb.append(article.getContent());
 
-        File file = new File(blogPath + "/source/_posts/" + article.getWritingId() + ".md");
-
-        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
-        bufferedWriter.write(sb.toString());
-        bufferedWriter.flush();
-        bufferedWriter.close();
-    }
 }

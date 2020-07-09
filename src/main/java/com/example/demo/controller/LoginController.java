@@ -122,35 +122,29 @@ public class LoginController {
      * @param userId
      * @param result
      */
-    private void initCollectionList(Long userId, JSONDataResult result) {
+    private void initCollectionList(Long userId, JSONDataResult result) throws SystemException {
         List<Collection> allCollections = collectionService.queryAllCollectionsByUserId(userId);
         //用户关注列表
         Set<Long> userWatchSet = new HashSet<>();
         //用户喜欢列表
-        Set<Object> userLikeSet = new HashSet<>();
+        Set<String> userLikeSet = new HashSet<>();
         //用户收藏列表
-        Set<Object> userKeepSet = new HashSet<>();
+        Set<String> userKeepSet = new HashSet<>();
 
         for (Collection collection : allCollections) {
             String collectionId = collection.getCollectionId();
             switch (collection.getCollectionType()) {
-                case USER_WATCH:
+                case Dict.USER_WATCH:
                     userWatchSet.add(Long.valueOf(collectionId));
                     break;
-                case ARTICLE_LIKE:
-                    userLikeSet.add(Long.valueOf(collectionId));
-                    break;
-                case ATLAS_LIKE:
+                case Dict.WRITING_LIKE:
                     userLikeSet.add(collectionId);
                     break;
-                case ARTICLE_KEEP:
-                    userKeepSet.add(Long.valueOf(collectionId));
-                    break;
-                case ATLAS_KEEP:
+                case Dict.WRITING_KEEP:
                     userKeepSet.add(collectionId);
                     break;
                 default:
-                    throw new IllegalStateException("Unexpected value: " + collection.getCollectionType());
+                    throw new SystemException(ExceptionEnums.DATA_HANDLE_ERROR);
             }
         }
         result.add("user_watch_list", userWatchSet)

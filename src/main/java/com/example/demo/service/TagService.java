@@ -5,6 +5,9 @@ import com.example.demo.exception.SystemException;
 
 import java.util.List;
 
+/**
+ * @author raining_heavily
+ */
 public interface TagService extends BaseService<Tag> {
 
     /**

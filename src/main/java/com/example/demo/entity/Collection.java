@@ -1,7 +1,9 @@
 package com.example.demo.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.example.demo.common.CollectionTypeEnum;
+import lombok.Data;
 
 import java.util.Date;
 
@@ -10,56 +12,18 @@ import java.util.Date;
  * @author raining_heavily
  * @date 2019/11/17 16:33
  **/
+@Data
 @TableName("demo_collection")
 public class Collection {
+    /** 主键 **/
+    @TableId(type = IdType.AUTO)
+    private Long id;
     /** 用户id **/
     private Long userId;
     /** 用户动作 **/
-    private CollectionTypeEnum collectionType;
+    private Integer collectionType;
     /** 动作对象 **/
     private String collectionId;
     /** 时间 **/
     private Date collectTime;
-
-    @Override
-    public String toString() {
-        return "Collection{" +
-                "userId=" + userId +
-                ", collectionType='" + collectionType + '\'' +
-                ", collectionId='" + collectionId + '\'' +
-                ", collectTime=" + collectTime +
-                '}';
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public CollectionTypeEnum getCollectionType() {
-        return collectionType;
-    }
-
-    public void setCollectionType(CollectionTypeEnum collectionType) {
-        this.collectionType = collectionType;
-    }
-
-    public String getCollectionId() {
-        return collectionId;
-    }
-
-    public void setCollectionId(String collectionId) {
-        this.collectionId = collectionId;
-    }
-
-    public Date getCollectTime() {
-        return collectTime;
-    }
-
-    public void setCollectTime(Date collectTime) {
-        this.collectTime = collectTime;
-    }
 }

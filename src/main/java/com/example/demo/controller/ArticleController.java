@@ -1,13 +1,12 @@
 package com.example.demo.controller;
 
 import com.example.demo.common.FileSourceEnum;
-import com.example.demo.entity.JSONDataResult;
-import com.example.demo.entity.JSONResult;
-import com.example.demo.entity.User;
-import com.example.demo.entity.Writing;
+import com.example.demo.entity.*;
 import com.example.demo.exception.ExceptionEnums;
 import com.example.demo.exception.SystemException;
-import com.example.demo.service.*;
+import com.example.demo.service.ImageService;
+import com.example.demo.service.TagService;
+import com.example.demo.service.impl.ArticleServiceImpl;
 import com.example.demo.util.MarkdownUtil;
 import com.example.demo.util.Util;
 import com.mongodb.client.result.UpdateResult;
@@ -27,9 +26,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
+ * 文章相关
  * @author raining_heavily
  */
 @RestController
@@ -38,7 +40,7 @@ public class ArticleController {
     private static final Logger logger = LoggerFactory.getLogger(ArticleController.class);
 
     @Autowired
-    ArticleService articleService;
+    ArticleServiceImpl articleService;
     @Autowired
     TagService tagService;
     @Autowired
@@ -67,6 +69,13 @@ public class ArticleController {
             writing.setFrontCover(relativePath);
         }
         //标签处理
+        List<Tag> tagList = writing.getTags();
+        if (tagList != null) {
+            tagService.handleTagList(tagList, true);
+        } else {
+            //空时添加空list
+            writing.setTags(new ArrayList<>());
+        }
         tagService.handleTagList(writing.getTags(), true);
         //文章处理
         articleService.articleHandle(writing);
@@ -115,7 +124,7 @@ public class ArticleController {
             throw new SystemException(ExceptionEnums.DATA_UPDATE_FAIL);
         }
         if (writing.getSaveToFile()) {
-            MarkdownUtil.writeContentToFile(writing);
+            articleService.writeContentToFile(writing);
             Util.shellExecute(shell);
         }
         return JSONResult.success();
