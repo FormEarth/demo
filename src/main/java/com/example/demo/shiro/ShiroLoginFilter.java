@@ -1,7 +1,8 @@
 package com.example.demo.shiro;
-import com.alibaba.fastjson.JSONObject;
+
 import com.example.demo.entity.JSONResult;
 import com.example.demo.exception.ExceptionEnums;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.shiro.web.filter.authc.FormAuthenticationFilter;
 
 import javax.servlet.ServletRequest;
@@ -22,7 +23,8 @@ public class ShiroLoginFilter extends FormAuthenticationFilter{
             httpServletResponse.setCharacterEncoding("UTF-8");
             httpServletResponse.setContentType("application/json");
             JSONResult result = new JSONResult(ExceptionEnums.USER_NOT_LOGIN);
-            httpServletResponse.getWriter().write(JSONObject.toJSON(result).toString());
+            ObjectMapper mapper = new ObjectMapper();
+            httpServletResponse.getWriter().write(mapper.writeValueAsString(result));
         } else {
             //saveRequestAndRedirectToLogin(request, response);
             /**

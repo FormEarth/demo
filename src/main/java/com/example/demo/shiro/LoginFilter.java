@@ -1,16 +1,14 @@
 package com.example.demo.shiro;
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import com.example.demo.entity.JSONResult;
+import com.example.demo.exception.ExceptionEnums;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.shiro.web.filter.authc.UserFilter;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-
-import org.apache.shiro.web.filter.authc.UserFilter;
-
-import com.alibaba.fastjson.JSONObject;
-import com.example.demo.entity.JSONResult;
-import com.example.demo.exception.ExceptionEnums;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
  * 
@@ -29,7 +27,8 @@ public class LoginFilter  extends UserFilter{
 		JSONResult result = new JSONResult(ExceptionEnums.USER_NOT_LOGIN);
 		// 写回给客户端
 		PrintWriter out = response.getWriter();
-		out.write(JSONObject.toJSONString(result));
+		ObjectMapper mapper = new ObjectMapper();
+		out.write(mapper.writeValueAsString(result));
 		// 刷新和关闭输出流
 		out.flush();
 		out.close();
