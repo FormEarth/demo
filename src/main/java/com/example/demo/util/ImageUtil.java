@@ -161,7 +161,9 @@ public class ImageUtil {
             //throw new SystemException(ExceptionEnums.IMAGE_HANDLE_ERROR);
             return angles;
         }
-        String orientation = metadata.getDirectory(ExifIFD0Directory.class).getString(ExifIFD0Directory.TAG_ORIENTATION);
+        Directory directory = metadata.getDirectory(ExifIFD0Directory.class);
+        if(directory==null) return angles;
+        String orientation = directory.getString(ExifIFD0Directory.TAG_ORIENTATION);
         switch (orientation) {
             case "3":
                 angles = 180;

@@ -35,7 +35,7 @@ public class ArticleServiceImpl extends BaseServiceImpl<Article> implements Arti
     private static final Logger logger = LoggerFactory.getLogger(ArticleServiceImpl.class);
 
     @Value(value = "${path.blog.hexo}")
-    private static String blogPath;
+    private String blogPath;
     @Value(value = "${static.blog.generate.shell}")
     private String[] shell;
     @Autowired
