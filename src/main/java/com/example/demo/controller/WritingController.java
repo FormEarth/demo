@@ -67,7 +67,7 @@ public class WritingController {
         if (currentLoginUser != null && userId != null) {
             //查自己内容
             if (currentLoginUser.getUserId().equals(userId)) {
-                query.addCriteria(Criteria.where("personal").is(true));
+//                query.addCriteria(Criteria.where("personal").is(true));
                 query.addCriteria(Criteria.where("creatorId").is(userId));
             }
         } else {

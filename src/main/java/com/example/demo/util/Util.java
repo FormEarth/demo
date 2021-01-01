@@ -278,6 +278,9 @@ public class Util {
         }
 
     }
+    public static boolean isEmpty(String str){
+        return str==""||str==null?true:false;
+    }
 
     public static void main(String[] args) throws CloneNotSupportedException, SystemException, IOException {
 //		System.out.println();

@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.util.UUID;
 
 import com.example.demo.common.FileSourceEnum;
+import com.example.demo.exception.ExceptionUtil;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,8 +115,7 @@ public class ImageServiceImpl implements ImageService {
             //Thumbnails自动处理Exif里的Orientation不准确，这里读取Orientation来旋转
             builder.useExifOrientation(false).outputQuality(0.25f).scale(1f).rotate(angles).toFile(outFile);
         } catch (Exception ex) {
-            logger.error(ex.getMessage());
-            logger.error(ExceptionEnums.IMAGE_FILE_COMPRESSION_FAIL.getMessage());
+            logger.error(ExceptionUtil.getStackTraceString(ex));
             throw new SystemException(ExceptionEnums.IMAGE_FILE_UPLOAD_FAIL);
         }
 
